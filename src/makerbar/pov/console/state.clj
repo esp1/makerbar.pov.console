@@ -32,6 +32,9 @@
 
 (def state (atom default-state))
 
+
+; Functions
+
 (def file-chooser
   (let [image-file-filter (FileNameExtensionFilter. "Image/Movie file (png, jpg, bmp, gif, mov)" (into-array ["png" "jpg" "bmp" "gif" "mov"]))]
     (doto (JFileChooser. (io/file "images"))

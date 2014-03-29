@@ -54,8 +54,8 @@
                                      (.translate img-x-offset img-y-offset)
                                      (.scale img-scale)
                                      (.image pimg 0 0)))]
-              (doseq [x (range (- pov-x-offset s/pov-width) s/pov-width)
-                      y (range (- pov-y-offset s/pov-height) s/pov-height)]
+              (doseq [x (range (- pov-x-offset s/pov-width) s/pov-width s/pov-width)
+                      y (range (- pov-y-offset s/pov-height) s/pov-height s/pov-height)]
                 (.image @s/graphics x-graphics x y))))))
   
   (q/image @s/graphics 0 0))
