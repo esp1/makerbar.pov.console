@@ -34,15 +34,17 @@
         graphics @graphics
         img-graphics @img-graphics]
     (u/draw graphics
-            (.background graphics 0)
+            (doto graphics
+              (.background 0)
+              #_(.scale ))
             
             (when-let [img (:image state)]
               (let [img-width (.width img)
                     img-height (.height img)
                     pimg (PImage. img-width img-height)
                     {:keys [contrast brightness
-                            img-x-offset img-y-offset img-scale
-                            pov-x-offset pov-y-offset]} state]
+                            img-offset img-scale
+                            pov-offset]} state]
                 ; adjust contrast and brightness
                 (.loadPixels img)
                 (let [img-pixels (.pixels img)
@@ -59,12 +61,14 @@
                   (.translate graphics (- (- s/pov-width 1)) 0))
                 
                 ; draw image
-                (let [x-graphics (u/draw img-graphics
+                (let [[img-x-offset img-y-offset] img-offset
+                      x-graphics (u/draw img-graphics
                                          (doto img-graphics
                                            (.background 0)
                                            (.translate img-x-offset img-y-offset)
                                            (.scale img-scale)
-                                           (.image pimg 0 0)))]
+                                           (.image pimg 0 0)))
+                      [pov-x-offset pov-y-offset] pov-offset]
                   (doseq [x (range (- pov-x-offset s/pov-width) s/pov-width s/pov-width)
                           y (range (- pov-y-offset s/pov-height) s/pov-height s/pov-height)]
                     (.image graphics x-graphics x y))))))

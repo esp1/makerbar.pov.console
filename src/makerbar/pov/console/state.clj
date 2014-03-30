@@ -13,14 +13,12 @@
 (def default-state
   {:brightness 0
    :contrast 1
-                    
-   :pov-x-offset 0
-   :pov-y-offset 0
-                    
-   :img-x-offset 0
-   :img-y-offset 0
+   
+   :pov-offset [0 0]
+   
+   :img-offset [0 0]
    :img-scale 1
-                    
+   
    :rotation-direction 1
    :rotation-speed 2
    :flip-image false})
@@ -40,13 +38,16 @@
         (if (< range mval) (- mval range)
           mval)))))
 
-(defn inc-pov-offset-x [dx] (swap! state update-in [:pov-x-offset] #(wrapped (+ % dx) pov-width)))
-(defn inc-pov-offset-y [dy] (swap! state update-in [:pov-y-offset] #(wrapped (+ % dy) pov-height)))
+(defn inc-pov-offset
+  [[dx dy]]
+  (swap! state update-in
+         [:pov-offset]
+         (fn [[x y]]
+           [(wrapped (+ x dx) pov-width) (wrapped (+ y dy) pov-height)])))
 
 (defn inc-img-scale [ds] (swap! state update-in [:img-scale] #(+ % (* 0.01 ds))))
 
-(defn inc-img-offset-x [dx] (swap! state update-in [:img-x-offset] #(+ % dx)))
-(defn inc-img-offset-y [dy] (swap! state update-in [:img-y-offset] #(+ % dy)))
+(defn inc-img-offset [offset] (swap! state update-in [:img-offset] #(map + % offset)))
 
 (defn rotation-speed [speed] (swap! state assoc :rotation-speed speed))
 (defn toggle-rotation-direction [] (swap! state assoc :rotation-direction (- (:rotation-direction @state))))

@@ -31,7 +31,7 @@
       (q/text (str "Processing FPS: " (format "%.1f" fps)) 40 40))
     
     ; rotate
-    (s/inc-pov-offset-x (* (:rotation-speed @s/state) (:rotation-direction @s/state))))
+    (s/inc-pov-offset [(* (:rotation-speed @s/state) (:rotation-direction @s/state)) 0]))
   
   (u/with-matrix
     (q/translate 40 80)

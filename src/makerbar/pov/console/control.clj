@@ -14,18 +14,18 @@
       KeyEvent/VK_X (i/inc-image-selection 1)
       KeyEvent/VK_SPACE (i/display-selected-image)
       
-      KeyEvent/VK_LEFT (s/inc-pov-offset-x (- factor))
-      KeyEvent/VK_RIGHT (s/inc-pov-offset-x factor)
-      KeyEvent/VK_UP (s/inc-pov-offset-y (- factor))
-      KeyEvent/VK_DOWN (s/inc-pov-offset-y factor)
+      KeyEvent/VK_LEFT (s/inc-pov-offset [(- factor) 0])
+      KeyEvent/VK_RIGHT (s/inc-pov-offset [factor 0])
+      KeyEvent/VK_UP (s/inc-pov-offset [0 (- factor)])
+      KeyEvent/VK_DOWN (s/inc-pov-offset [0 factor])
       
       KeyEvent/VK_EQUALS (s/inc-img-scale factor)
       KeyEvent/VK_MINUS (s/inc-img-scale (- factor))
       
-      KeyEvent/VK_H (s/inc-img-offset-x (- factor))
-      KeyEvent/VK_K (s/inc-img-offset-x factor)
-      KeyEvent/VK_U (s/inc-img-offset-y (- factor))
-      KeyEvent/VK_J (s/inc-img-offset-y factor)
+      KeyEvent/VK_H (s/inc-img-offset [(- factor) 0])
+      KeyEvent/VK_K (s/inc-img-offset [factor 0])
+      KeyEvent/VK_U (s/inc-img-offset [0 (- factor)])
+      KeyEvent/VK_J (s/inc-img-offset [0 factor])
       
       KeyEvent/VK_0 (s/rotation-speed 0)
       KeyEvent/VK_1 (s/rotation-speed 1)
