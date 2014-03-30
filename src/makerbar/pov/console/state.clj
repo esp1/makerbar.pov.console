@@ -15,31 +15,26 @@
 
 (def x2-addr "192.168.0.3")
 
-(def default-state {:brightness 0
-                    :contrast 1
+(def default-state
+  {:brightness 0
+   :contrast 1
                     
-                    :pov-x-offset 0
-                    :pov-y-offset 0
+   :pov-x-offset 0
+   :pov-y-offset 0
                     
-                    :img-x-offset 0
-                    :img-y-offset 0
-                    :img-scale 1
+   :img-x-offset 0
+   :img-y-offset 0
+   :img-scale 1
                     
-                    :rotation-direction 1
-                    :rotation-speed 2
-                    :flip-image false})
+   :rotation-direction 1
+   :rotation-speed 2
+   :flip-image false})
 
 
 ; State
 
-(def graphics (atom nil))
-(def img-graphics (atom nil))
-
 (def state (atom default-state))
 
-(defn init []
-  (reset! graphics (q/create-graphics pov-width pov-height))
-  (reset! img-graphics (q/create-graphics pov-width pov-height)))
 
 ; Functions
 
@@ -87,47 +82,25 @@
         (if (< range mval) (- mval range)
           mval)))))
 
-(defn inc-pov-offset-x
-  [dx]
-  (swap! state update-in [:pov-x-offset] #(wrapped (+ % dx) pov-width)))
+(defn inc-pov-offset-x [dx] (swap! state update-in [:pov-x-offset] #(wrapped (+ % dx) pov-width)))
+(defn inc-pov-offset-y [dy] (swap! state update-in [:pov-y-offset] #(wrapped (+ % dy) pov-height)))
 
-(defn inc-pov-offset-y
-  [dy]
-  (swap! state update-in [:pov-y-offset] #(wrapped (+ % dy) pov-height)))
+(defn inc-img-scale [ds] (swap! state update-in [:img-scale] #(+ % (* 0.01 ds))))
 
-(defn inc-img-scale
-  [ds]
-  (swap! state update-in [:img-scale] #(+ % (* 0.01 ds))))
+(defn inc-img-offset-x [dx] (swap! state update-in [:img-x-offset] #(+ % dx)))
+(defn inc-img-offset-y [dy] (swap! state update-in [:img-y-offset] #(+ % dy)))
 
-(defn inc-img-offset-x
-  [dx]
-  (swap! state update-in [:img-x-offset] #(+ % dx)))
-
-(defn inc-img-offset-y
-  [dy]
-  (swap! state update-in [:img-y-offset] #(+ % dy)))
-
-(defn rotation-speed
-  [speed]
-  (swap! state assoc :rotation-speed speed))
-
-(defn toggle-rotation-direction []
-  (swap! state assoc :rotation-direction (- (:rotation-direction @state))))
+(defn rotation-speed [speed] (swap! state assoc :rotation-speed speed))
+(defn toggle-rotation-direction [] (swap! state assoc :rotation-direction (- (:rotation-direction @state))))
 
 (defn toggle-flip-image []
   (swap! state assoc :flip-image (not (:flip-image @state)))
   (toggle-rotation-direction))
 
-(defn inc-brightness
-  [db]
-  (swap! state update-in [:brightness] #(+ % db)))
+(defn inc-brightness [db] (swap! state update-in [:brightness] #(+ % db)))
+(defn inc-contrast [dc] (swap! state update-in [:contrast] #(max 1 (+ % dc))))
 
-(defn inc-contrast
-  [dc]
-  (swap! state update-in [:contrast] #(max 1 (+ % dc))))
-
-(defn reset-settings []
-  (reset! state default-state))
+(defn reset-settings [] (reset! state default-state))
 
 (defn inc-image-selection
   [di]

@@ -6,6 +6,14 @@
             [quil.core :as q]))
 
 
+(def graphics (atom nil))
+(def img-graphics (atom nil))
+
+(defn init []
+  (reset! graphics (q/create-graphics s/pov-width s/pov-height))
+  (reset! img-graphics (q/create-graphics s/pov-width s/pov-height)))
+
+
 (defn adjust-color-channel
   "Apply brightness (+) and contrast (*) to color channel value"
   [^long value
@@ -23,8 +31,8 @@
 
 (defn draw-image []
   (let [state @s/state
-        graphics @s/graphics
-        img-graphics @s/img-graphics]
+        graphics @graphics
+        img-graphics @img-graphics]
     (u/draw graphics
             (.background graphics 0)
             

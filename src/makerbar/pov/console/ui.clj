@@ -8,7 +8,7 @@
 
 (defn setup []
 ;  (q/frame-rate 30)
-  (s/init))
+  (d/init))
 
 (def time-t (atom (System/currentTimeMillis)))
 
