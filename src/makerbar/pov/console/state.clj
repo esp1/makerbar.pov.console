@@ -34,11 +34,8 @@
 ; Functions
 
 (defn wrapped
-  ([value upper-bound] (wrapped value 0 upper-bound))
-  ([value lower-bound upper-bound]
-    {:pre (< lower-bound upper-bound)}
-    (let [range (- upper-bound lower-bound)
-          mval (mod value range)]
+  ([value range]
+    (let [mval (mod value range)]
       (if (< mval 0) (+ mval range)
         (if (< range mval) (- mval range)
           mval)))))
