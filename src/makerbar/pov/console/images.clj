@@ -42,12 +42,7 @@
         ".mov" (println "Movie file:" path)
         (do
           (println "Image file:" path)
-          (let [img (q/load-image path)
-                {:keys [offset scale]} (scale-image-instructions img s/pov-width s/pov-height)]
-            (swap! s/state assoc
-                   :image img
-                   :img-offset offset
-                   :img-scale scale)))))))
+          (swap! s/state assoc :image (q/load-image path)))))))
 
 
 (defn list-images

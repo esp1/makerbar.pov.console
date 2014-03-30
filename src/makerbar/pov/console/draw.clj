@@ -1,17 +1,18 @@
 (ns makerbar.pov.console.draw
   (:import [processing.core PImage])
   (:require [hiphip.int :as int]
+            [makerbar.pov.console.images :as i]
             [makerbar.pov.console.state :as s]
             [makerbar.pov.console.util :as u]
             [quil.core :as q]))
 
 
-(def graphics (atom nil))
-(def img-graphics (atom nil))
+(def pov-graphics (atom nil))
+(def tile-graphics (atom nil))
 
 (defn init []
-  (reset! graphics (q/create-graphics s/pov-width s/pov-height))
-  (reset! img-graphics (q/create-graphics s/pov-width s/pov-height)))
+  (reset! pov-graphics (q/create-graphics s/pov-width s/pov-height))
+  (reset! tile-graphics (q/create-graphics s/pov-width s/pov-height)))
 
 
 (defn adjust-color-channel
@@ -30,47 +31,46 @@
     (bit-or 0xff000000 (bit-shift-left r 16) (bit-shift-left g 8) b)))
 
 (defn draw-image []
-  (let [state @s/state
-        graphics @graphics
-        img-graphics @img-graphics]
-    (u/draw graphics
-            (doto graphics
-              (.background 0)
-              #_(.scale ))
+  (when-let [img (:image @s/state)]
+    ; draw scaled image to pov-graphics
+    (u/draw @pov-graphics
+            (let [{:keys [offset scale]} (i/scale-image-instructions img s/pov-width s/pov-height)
+                  [offset-x offset-y] offset]
+              (doto @pov-graphics
+                (.background 0)
+                (.scale scale)
+                (.image img offset-x offset-y)))
             
-            (when-let [img (:image state)]
-              (let [img-width (.width img)
-                    img-height (.height img)
-                    pimg (PImage. img-width img-height)
-                    {:keys [contrast brightness
-                            img-offset img-scale
-                            pov-offset]} state]
-                ; adjust contrast and brightness
-                (.loadPixels img)
-                (let [img-pixels (.pixels img)
-                      pimg-pixels (.pixels pimg)]
-                  (doseq [i (range 0 (* img-width img-height))]
-                    (let [color (int/aget img-pixels i)
-                          adjusted-color (adjust-color color brightness contrast)]
-                      (int/aset pimg-pixels i adjusted-color)))
-                  (.updatePixels pimg))
-                
-                ; flip image
-                (when (:flip-image state)
-                  (.scale graphics -1 1)
-                  (.translate graphics (- (- s/pov-width 1)) 0))
-                
-                ; draw image
-                (let [[img-x-offset img-y-offset] img-offset
-                      x-graphics (u/draw img-graphics
-                                         (doto img-graphics
-                                           (.background 0)
-                                           (.translate img-x-offset img-y-offset)
-                                           (.scale img-scale)
-                                           (.image pimg 0 0)))
-                      [pov-x-offset pov-y-offset] pov-offset]
-                  (doseq [x (range (- pov-x-offset s/pov-width) s/pov-width s/pov-width)
-                          y (range (- pov-y-offset s/pov-height) s/pov-height s/pov-height)]
-                    (.image graphics x-graphics x y))))))
+            ; flip image
+            (when (:flip-image @s/state)
+              (doto @pov-graphics
+                (.scale -1 1)
+                (.translate (- (- s/pov-width 1)) 0))))
     
-    (q/image graphics 0 0)))
+    ; adjust contrast and brightness
+    (let [{:keys [contrast brightness]} @s/state]
+      (.loadPixels @pov-graphics)
+      (let [pixels (.pixels @pov-graphics)]
+        (doseq [i (range 0 (* s/pov-width s/pov-height))]
+          (let [color (int/aget pixels i)
+                adjusted-color (adjust-color color brightness contrast)]
+            (int/aset pixels i adjusted-color)))
+        (.updatePixels @pov-graphics)))
+    
+    ; draw tile to tile-graphics
+    (let [{[img-x-offset img-y-offset] :img-offset
+           img-scale :img-scale} @s/state]
+      (u/draw @tile-graphics
+              (doto @tile-graphics
+                (.background 0)
+                (.scale img-scale)
+                (.image @pov-graphics img-x-offset img-y-offset))))
+            
+    ; tile images (overwrite pov-graphics)
+    (let [{[pov-x-offset pov-y-offset] :pov-offset} @s/state]
+      (u/draw @pov-graphics
+              (doseq [x (range (- pov-x-offset s/pov-width) s/pov-width s/pov-width)
+                      y (range (- pov-y-offset s/pov-height) s/pov-height s/pov-height)]
+                (.image @pov-graphics @tile-graphics x y))))
+  
+    (q/image @pov-graphics 0 0)))
