@@ -1,4 +1,4 @@
-(ns makerbar.pov.console.control
+(ns makerbar.pov.console.kbd-control
     (:import [java.awt.event KeyEvent])
     (:require [makerbar.pov.console.images :as i]
               [makerbar.pov.console.state :as s]
@@ -51,12 +51,11 @@
       
       nil)))
 
-(defn display-controls []
+(defn display-keyboard-controls []
   (u/with-style
     (q/stroke 255)
-    (q/text "
-l : re/load properties
-o : open image file
+    (q/text
+"o : open image file
 c : capture video
 
 z/x : select image

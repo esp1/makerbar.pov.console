@@ -1,8 +1,8 @@
 (ns makerbar.pov.console.ui
   (:gen-class)
-  (:require [makerbar.pov.console.control :as c]
-            [makerbar.pov.console.draw :as d]
+  (:require [makerbar.pov.console.draw :as d]
             [makerbar.pov.console.images :as i]
+            [makerbar.pov.console.kbd-control :as k]
             [makerbar.pov.console.state :as s]
             [makerbar.pov.console.util :as u]
             [quil.core :as q]))
@@ -56,7 +56,7 @@
   ; instructions 
   (u/with-matrix
     (q/translate 40 (- (q/height) 400))
-    (c/display-controls))
+    (k/display-keyboard-controls))
   
   ; status
   (u/with-matrix
@@ -71,5 +71,5 @@
     :setup setup
     :draw draw
     :size [(q/screen-width) (q/screen-height)]
-    :key-pressed c/key-pressed
+    :key-pressed k/key-pressed
     :on-close #(System/exit 0)))
