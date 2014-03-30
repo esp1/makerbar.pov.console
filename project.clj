@@ -4,7 +4,8 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :profiles {:dev {:dependencies [[criterium "0.4.3"]]}}
-  :dependencies [[org.clojure/clojure "1.6.0"]
+  :dependencies [[extrapixel/gifAnimation "d734273"]
+                 [org.clojure/clojure "1.6.0"]
                  [prismatic/hiphip "0.2.0"]
                  [quil "2.0.0-SNAPSHOT"]]
   :aot [makerbar.pov.console.ui]

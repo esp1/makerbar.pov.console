@@ -1,5 +1,6 @@
 (ns makerbar.pov.console.images
-  (:import [javax.swing JFileChooser]
+  (:import [gifAnimation Gif]
+           [javax.swing JFileChooser]
            [javax.swing.filechooser FileNameExtensionFilter])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
@@ -18,6 +19,11 @@
 
 (def image-list (atom (list-images "images")))
 (def selected-image-index (atom 0))
+
+
+(defmulti stop class)
+(defmethod stop Gif [gif] (.stop gif))
+(defmethod stop :default [this])
 
 
 (defn scale-image-instructions
@@ -43,6 +49,7 @@
 (defn display-image
   [img]
   (s/reset-settings)
+  (stop (:image @s/state))
   (swap! s/state assoc :image img))
 
 (defn get-image
@@ -57,7 +64,11 @@
         (let [path (.getCanonicalPath file)
               suffix (str/lower-case (subs path (.lastIndexOf path ".")))
               img (condp = suffix
-                    ; ".gif" (println "GIF" file-path)
+                    ".gif" (do
+                             (println "GIF" path)
+                             (let [gif (Gif. (a/current-applet) path)]
+                               (.loop gif)
+                               gif))
                     ".mov" (println "Movie file:" path)
                     (do
                       (println "Image file:" path)
