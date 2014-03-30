@@ -2,17 +2,16 @@
     (:import [java.awt.event KeyEvent])
     (:require [makerbar.pov.console.images :as i]
               [makerbar.pov.console.state :as s]
-              [makerbar.pov.console.util :as u]
               [quil.core :as q]))
 
 (defn key-pressed []
   (let [factor (if #_shiftDown true 10 1)]
     (condp = (q/key-code)
       
-      KeyEvent/VK_O (i/open-image-file)
+      KeyEvent/VK_O (i/display-image (i/get-image))
       KeyEvent/VK_Z (i/inc-image-selection -1)
       KeyEvent/VK_X (i/inc-image-selection 1)
-      KeyEvent/VK_SPACE (i/display-selected-image)
+      KeyEvent/VK_SPACE (i/display-image (i/get-image @i/selected-image-index))
       
       KeyEvent/VK_LEFT (s/inc-pov-offset [(- factor) 0])
       KeyEvent/VK_RIGHT (s/inc-pov-offset [factor 0])
@@ -52,9 +51,6 @@
       nil)))
 
 (defn display-keyboard-controls []
-  (u/with-style
-    (q/stroke 255)
-    (q/text
 "o : open image file
 c : capture video
 
@@ -69,5 +65,4 @@ S/W : brightness decrease/increase
 (hold shift for fine scale/offset)
 0-9 : rotation speed
 R : change rotation direction
-F : flip image"
-            0 0)))
+F : flip image")

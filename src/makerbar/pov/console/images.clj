@@ -4,9 +4,20 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [makerbar.pov.console.state :as s]
-            [makerbar.pov.console.util :as u]
             [quil.applet :as a]
             [quil.core :as q]))
+
+
+(defn list-images
+  [path]
+  (mapv (fn [f] {:file f})
+       (filterv #(.isFile %)
+                (mapv #(io/file path %)
+                     (-> (io/file path) .list sort)))))
+
+
+(def image-list (atom (list-images "images")))
+(def selected-image-index (atom 0))
 
 
 (defn scale-image-instructions
@@ -29,33 +40,30 @@
       (.addChoosableFileFilter image-file-filter)
       (.setFileFilter image-file-filter))))
 
-(defn open-image-file
+(defn display-image
+  [img]
+  (s/reset-settings)
+  (swap! s/state assoc :image img))
+
+(defn get-image
   ([]
     (when (= (.showOpenDialog file-chooser (a/current-applet))
              JFileChooser/APPROVE_OPTION)
-      (open-image-file (.getSelectedFile file-chooser))))
-  ([file]
-    (let [path (.getCanonicalPath file)
-          suffix (str/lower-case (subs path (.lastIndexOf path ".")))]
-      (condp = suffix
-        ; ".gif" (println "GIF" file-path)
-        ".mov" (println "Movie file:" path)
-        (do
-          (println "Image file:" path)
-          (swap! s/state assoc :image (q/load-image path)))))))
-
-
-(defn list-images
-  [path]
-  (filterv #(.isFile %)
-          (map #(io/file path %)
-               (-> (io/file path) .list sort))))
-
-(def image-list (atom (list-images "images")))
-(def selected-image-index (atom 0))
-
-(defn selected-image-file []
-  (get @image-list @selected-image-index))
+      (get-image (.getSelectedFile file-chooser))))
+  ([index]
+    (if-let [{:keys [file image] :as image-info} (get @image-list index)]
+      (if image
+        image
+        (let [path (.getCanonicalPath file)
+              suffix (str/lower-case (subs path (.lastIndexOf path ".")))
+              img (condp = suffix
+                    ; ".gif" (println "GIF" file-path)
+                    ".mov" (println "Movie file:" path)
+                    (do
+                      (println "Image file:" path)
+                      (q/load-image path)))]
+          (swap! image-list assoc-in [index :image] img)
+          img)))))
 
 (defn inc-image-selection
   [di]
@@ -67,20 +75,7 @@
                                      n)))))
 
 (defn display-image-list []
-  (u/with-matrix
-    (when-let [file (selected-image-file)]
-      (let [img (q/load-image (.getCanonicalPath file))
-            {:keys [offset scale]} (scale-image-instructions img s/pov-width s/pov-height)]
-        (q/translate offset)
-        (q/scale scale)
-        (q/image img 0 0))))
-  
-  (u/with-matrix
-    (q/translate 0 110)
-    (u/with-style
-      (q/stroke 255)
-      (q/text (apply str (map #(str (.getName %) \newline) @image-list)) 0 0))))
-
-(defn display-selected-image []
-  (s/reset-settings)
-  (open-image-file (selected-image-file)))
+  (apply str (for [i (range (count @image-list))]
+               (str (.getName (:file (get @image-list i)))
+                    (if (= i @selected-image-index) " *")
+                    \newline))))

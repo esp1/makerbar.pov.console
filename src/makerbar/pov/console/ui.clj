@@ -51,17 +51,27 @@
   ; image list
   (u/with-matrix
     (q/translate (- (q/width) 500) 100)
-    (i/display-image-list))
+    
+    (u/with-matrix
+     (when-let [img (i/get-image @i/selected-image-index)]
+       (let [{:keys [offset scale]} (i/scale-image-instructions img s/pov-width s/pov-height)]
+         (q/translate offset)
+         (q/scale scale)
+         (q/image img 0 0))))
+    
+    (u/with-style
+      (q/stroke 255)
+      (q/text (i/display-image-list) 0 120)))
 
   ; instructions 
-  (u/with-matrix
-    (q/translate 40 (- (q/height) 400))
-    (k/display-keyboard-controls))
+  (u/with-style
+    (q/stroke 255)
+    (q/text (k/display-keyboard-controls) 40 (- (q/height) 400)))
   
   ; status
-  (u/with-matrix
-    (q/translate 400 (- (q/height) 400))
-    (s/display-status))
+  (u/with-style
+    (q/stroke 255)
+    (q/text (s/display-status) 400 (- (q/height) 400)))
   
   #_(x2-send))
 

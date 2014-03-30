@@ -1,6 +1,4 @@
-(ns makerbar.pov.console.state
-  (:require [makerbar.pov.console.util :as u]
-            [quil.core :as q]))
+(ns makerbar.pov.console.state)
 
 
 ; Constants
@@ -62,9 +60,6 @@
 (defn reset-settings [] (reset! state default-state))
 
 (defn display-status []
-  (u/with-style
-    (q/stroke 255)
-    (q/text (apply str (map (fn [[key val]]
-                              (str (name key) ": " val \newline))
-                            @state))
-            0 0)))
+  (apply str (map (fn [[key val]]
+                    (str (name key) ": " val \newline))
+                  @state)))
