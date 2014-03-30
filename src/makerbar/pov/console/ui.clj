@@ -1,48 +1,65 @@
 (ns makerbar.pov.console.ui
-  (:import [java.awt.event KeyEvent])
-  (:require [makerbar.pov.console.draw :as d]
+  (:require [makerbar.pov.console.control :as c]
+            [makerbar.pov.console.draw :as d]
             [makerbar.pov.console.state :as s]
-            [makerbar.pov.console.util :as u :refer (with-matrix with-style)]
+            [makerbar.pov.console.util :as u]
             [quil.core :as q]))
 
 
-; Processing fns
-
 (defn setup []
-  (q/frame-rate 10)
-  (reset! s/graphics (q/create-graphics s/pov-width s/pov-height))
-  (reset! s/img-graphics (q/create-graphics s/pov-width s/pov-height)))
+;  (q/frame-rate 30)
+  (s/init))
+
+(def time-t (atom (System/currentTimeMillis)))
 
 (defn draw []
   ; clear
   (q/background 100)
   
-  (with-matrix
+  ; info
+  (q/text (str "Display dimensions: " s/pov-width " x " s/pov-height) 40 (- 80 20 (q/text-descent)))
+  
+  (let [t @time-t
+        now (System/currentTimeMillis)
+        fps (float (/ 1000 (- now t)))]
+    (reset! time-t now)
+    
+    ; display frames per second
+    (u/with-style
+      (q/stroke 255)
+      (q/text (str "Processing FPS: " (format "%.1f" fps)) 40 40))
+    
+    ; rotate
+    (s/inc-pov-offset-x (* (:rotation-speed @s/state) (:rotation-direction @s/state))))
+  
+  (u/with-matrix
     (q/translate 40 80)
     (q/scale 3 3)
     
     ; draw image
     (d/draw-image)
     
-    (with-style
+    (u/with-style
       (q/stroke 200)
       (q/no-fill)
       
       ; draw frame
       (q/rect -1 -1 (+ s/pov-width 1) (+ s/pov-height 1))))
   
-  ; info
-  (q/text (str "Display dimensions: " s/pov-width " x " s/pov-height) 40 (- 80 20 (q/text-descent)))
-  
   ; image list
-  (with-matrix
+  (u/with-matrix
     (q/translate (- (q/width) 500) 100)
     (d/display-image-list))
 
   ; instructions 
-  (with-matrix
+  (u/with-matrix
     (q/translate 40 (- (q/height) 400))
-    (d/display-instructions))
+    (c/display-controls))
+  
+  ; status
+  (u/with-matrix
+    (q/translate (- (q/width) 500) (- (q/height) 400))
+    (s/display-status))
   
   #_(x2-send))
 
@@ -50,15 +67,5 @@
   :title "Orbital Rendersphere Control"
   :setup setup
   :draw draw
-  :size [400 300] #_[(q/screen-width) (q/screen-height)]
-  :key-pressed #(let [factor (if #_shiftDown true 1 10)]
-                  (condp = (q/key-code)
-                    
-                    KeyEvent/VK_O (s/open-image-file)
-                    
-                    KeyEvent/VK_LEFT (s/pov-offset-x (- factor))
-                    KeyEvent/VK_RIGHT (s/pov-offset-x factor)
-                    KeyEvent/VK_UP (s/pov-offset-y (- factor))
-                    KeyEvent/VK_DOWN (s/pov-offset-y factor)
-                    
-                    nil)))
+  :size [(q/screen-width) (q/screen-height)]
+  :key-pressed c/key-pressed)
