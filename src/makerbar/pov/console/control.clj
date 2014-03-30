@@ -1,6 +1,7 @@
 (ns makerbar.pov.console.control
     (:import [java.awt.event KeyEvent])
-    (:require [makerbar.pov.console.state :as s]
+    (:require [makerbar.pov.console.images :as i]
+              [makerbar.pov.console.state :as s]
               [makerbar.pov.console.util :as u]
               [quil.core :as q]))
 
@@ -8,7 +9,10 @@
   (let [factor (if #_shiftDown true 10 1)]
     (condp = (q/key-code)
       
-      KeyEvent/VK_O (s/open-image-file)
+      KeyEvent/VK_O (i/open-image-file)
+      KeyEvent/VK_Z (i/inc-image-selection -1)
+      KeyEvent/VK_X (i/inc-image-selection 1)
+      KeyEvent/VK_SPACE (i/display-selected-image)
       
       KeyEvent/VK_LEFT (s/inc-pov-offset-x (- factor))
       KeyEvent/VK_RIGHT (s/inc-pov-offset-x factor)
@@ -45,10 +49,6 @@
       
       KeyEvent/VK_ESCAPE (s/reset-settings)
       
-      KeyEvent/VK_X (s/inc-image-selection 1)
-      KeyEvent/VK_Z (s/inc-image-selection -1)
-      KeyEvent/VK_SPACE (s/choose-image)
-      
       nil)))
 
 (defn display-controls []
@@ -58,6 +58,9 @@
 l : re/load properties
 o : open image file
 c : capture video
+
+z/x : select image
+space : display selected image
 
 -/+ : scale image decrease/increase
 H/K/U/J : image offset left/right/up/down

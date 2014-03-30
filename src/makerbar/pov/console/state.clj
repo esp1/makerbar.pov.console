@@ -1,10 +1,5 @@
 (ns makerbar.pov.console.state
-  (:import [javax.swing JFileChooser]
-           [javax.swing.filechooser FileNameExtensionFilter])
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [makerbar.pov.console.util :as u]
-            [quil.applet :as a]
+  (:require [makerbar.pov.console.util :as u]
             [quil.core :as q]))
 
 
@@ -38,40 +33,6 @@
 
 ; Functions
 
-(defn autoscale-image
-  [img]
-  (let [img-width (.width img)
-        img-height (.height img)]
-    (if (< (/ img-width img-height) (/ pov-width pov-height))
-      (let [img-scale (float (/ pov-height img-height))]
-        (swap! state assoc
-               :img-scale img-scale
-               :img-x-offset (int (/ (- pov-width (* img-width img-scale)) 2))))
-      (let [img-scale (float (/ pov-width img-width))]
-        (swap! state assoc
-               :img-scale img-scale
-               :img-y-offset (int (/ (- pov-height (* img-height img-scale))))))))
-  img)
-
-(def file-chooser
-  (let [image-file-filter (FileNameExtensionFilter. "Image/Movie file (png, jpg, bmp, gif, mov)" (into-array ["png" "jpg" "bmp" "gif" "mov"]))]
-    (doto (JFileChooser. (io/file "images"))
-      (.setAcceptAllFileFilterUsed false)
-      (.addChoosableFileFilter image-file-filter)
-      (.setFileFilter image-file-filter))))
-
-(defn open-image-file []
-  (when (= (.showOpenDialog file-chooser (a/current-applet))
-           JFileChooser/APPROVE_OPTION)
-    (let [file-path (.getCanonicalPath (.getSelectedFile file-chooser))
-          suffix (str/lower-case (subs file-path (.lastIndexOf file-path ".")))]
-      (condp = suffix
-;        ".gif" (println "GIF" file-path)
-        ".mov" (println "Movie file:" file-path)
-        (do
-          (println "Image file:" file-path)
-          (swap! state assoc :image (autoscale-image (q/load-image file-path))))))))
-
 (defn wrapped
   ([value upper-bound] (wrapped value 0 upper-bound))
   ([value lower-bound upper-bound]
@@ -101,13 +62,6 @@
 (defn inc-contrast [dc] (swap! state update-in [:contrast] #(max 1 (+ % dc))))
 
 (defn reset-settings [] (reset! state default-state))
-
-(defn inc-image-selection
-  [di]
-  )
-
-(defn choose-image []
-  )
 
 (defn display-status []
   (u/with-style

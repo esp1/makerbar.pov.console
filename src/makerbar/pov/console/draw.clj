@@ -70,8 +70,3 @@
                     (.image graphics x-graphics x y))))))
     
     (q/image graphics 0 0)))
-
-(defn display-image-list []
-  (u/with-style
-    (q/stroke 255)
-    (q/text "image list..." 0 0)))

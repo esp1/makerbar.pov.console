@@ -1,6 +1,7 @@
 (ns makerbar.pov.console.ui
   (:require [makerbar.pov.console.control :as c]
             [makerbar.pov.console.draw :as d]
+            [makerbar.pov.console.images :as i]
             [makerbar.pov.console.state :as s]
             [makerbar.pov.console.util :as u]
             [quil.core :as q]))
@@ -49,7 +50,7 @@
   ; image list
   (u/with-matrix
     (q/translate (- (q/width) 500) 100)
-    (d/display-image-list))
+    (i/display-image-list))
 
   ; instructions 
   (u/with-matrix
@@ -58,7 +59,7 @@
   
   ; status
   (u/with-matrix
-    (q/translate (- (q/width) 500) (- (q/height) 400))
+    (q/translate 400 (- (q/height) 400))
     (s/display-status))
   
   #_(x2-send))
