@@ -1,4 +1,5 @@
 (ns makerbar.pov.console.ui
+  (:gen-class)
   (:require [makerbar.pov.console.control :as c]
             [makerbar.pov.console.draw :as d]
             [makerbar.pov.console.images :as i]
@@ -64,9 +65,11 @@
   
   #_(x2-send))
 
-(q/defsketch POVConsole
-  :title "Orbital Rendersphere Control"
-  :setup setup
-  :draw draw
-  :size [(q/screen-width) (q/screen-height)]
-  :key-pressed c/key-pressed)
+(defn -main [& args]
+  (q/sketch
+    :title "Orbital Rendersphere Control"
+    :setup setup
+    :draw draw
+    :size [(q/screen-width) (q/screen-height)]
+    :key-pressed c/key-pressed
+    :on-close #(System/exit 0)))

@@ -6,4 +6,6 @@
   :profiles {:dev {:dependencies [[criterium "0.4.3"]]}}
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [prismatic/hiphip "0.2.0"]
-                 [quil "2.0.0-SNAPSHOT"]])
+                 [quil "2.0.0-SNAPSHOT"]]
+  :aot [makerbar.pov.console.ui]
+  :main makerbar.pov.console.ui)
