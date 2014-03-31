@@ -12,6 +12,8 @@
       KeyEvent/VK_X (i/inc-image-selection 1)
       KeyEvent/VK_SPACE (i/display-image (i/get-selected-image))
       
+      KeyEvent/VK_C (i/capture-video)
+      
       KeyEvent/VK_LEFT (s/inc-pov-offset [(- factor) 0])
       KeyEvent/VK_RIGHT (s/inc-pov-offset [factor 0])
       KeyEvent/VK_UP (s/inc-pov-offset [0 (- factor)])

@@ -58,7 +58,7 @@
     
     (p/with-matrix
       (when-let [img (i/get-selected-image)]
-        (let [{:keys [offset scale]} (i/scale-image-instructions img s/pov-width s/pov-height)]
+        (let [{:keys [offset scale]} (i/scale-image-instructions (.width img) (.height img) s/pov-width s/pov-height)]
           (p/translate offset)
           (p/scale scale)
           (p/image img 0 0))))

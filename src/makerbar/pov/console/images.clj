@@ -1,7 +1,8 @@
 (ns makerbar.pov.console.images
   (:import [gifAnimation Gif]
-           [javax.swing JFileChooser]
+           [javax.swing JFileChooser JOptionPane]
            [javax.swing.filechooser FileNameExtensionFilter]
+           [processing.core PConstants]
            [processing.video Capture Movie])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
@@ -30,13 +31,14 @@
 
 (defn scale-image-instructions
   "Returns a map indicating the offset and scaling factor that should be used to scale and center the given image into the target dimensions."
-  [img target-width target-height]
-  {:pre [(< 0 (.width img))
-         (< 0 (.height img))
-         (< 0 target-width)
-         (< 0 target-height)]}
-  (let [img-width (.width img)
-        img-height (.height img)]
+  ([]
+    (let [{:keys [img-width img-height]} @s/state]
+      (scale-image-instructions img-width img-height s/pov-width s/pov-height)))
+  ([img-width img-height target-width target-height]
+    {:pre [(< 0 img-width)
+           (< 0 img-height)
+           (< 0 target-width)
+           (< 0 target-height)]}
     (if (< (/ img-width img-height) (/ target-width target-height))
       (let [img-scale (/ target-height img-height)]
         {:offset [(int (/ (- target-width (* img-width img-scale)) 2)) 0]
@@ -54,9 +56,18 @@
 
 (defn display-image
   [img]
-  (s/reset-settings)
   (stop (:image @s/state))
-  (swap! s/state assoc :image img))
+  
+  (s/reset-settings)
+  
+  (swap! s/state assoc :image img)
+
+  (let [img-width (.width img)
+        img-height (.height img)]
+    (if (and (< 0 img-width) (< 0 img-height))
+      (swap! s/state assoc
+             :img-width img-width
+             :img-height img-height))))
 
 (defn get-image
   ([]
@@ -103,3 +114,38 @@
                (str (.getName (:file (get @image-list i)))
                     (if (= i @selected-image-index) " *")
                     \newline))))
+
+
+; video
+
+(defn list-cameras []
+  (p/cursor PConstants/WAIT)
+  (let [cameras (Capture/list)]
+    (p/cursor PConstants/ARROW)
+    cameras))
+
+(defn capture-video []
+  (let [cameras (list-cameras)
+        selected-camera (JOptionPane/showInputDialog
+                          (p/current-applet)
+                          ""
+                          "Select camera"
+                          JOptionPane/PLAIN_MESSAGE
+                          nil
+                          cameras
+                          nil)]
+    (when selected-camera
+      (println "Opening camera" selected-camera)
+      
+      (let [camera-props (apply merge (for [[key val] (map #(str/split % #"=")
+                                                           (str/split selected-camera #","))]
+                                        {(keyword key) val}))
+            {size :size} camera-props
+            [width height] (str/split size #"x")]
+        (swap! s/state assoc
+               :image-width (Integer/valueOf width)
+               :image-height (Integer/valueOf height))
+        
+        (let [camera (Capture. (p/current-applet) selected-camera)]
+          (.start camera)
+          (display-image camera))))))

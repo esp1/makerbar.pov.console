@@ -35,7 +35,7 @@
     ; draw scaled image to pov-graphics
     (p/with-graphics @pov-graphics
       (p/draw
-        (let [{:keys [offset scale]} (i/scale-image-instructions img s/pov-width s/pov-height)]
+        (let [{:keys [offset scale]} (i/scale-image-instructions)]
           (p/background 0)
           (p/scale scale)
           (p/image img offset))

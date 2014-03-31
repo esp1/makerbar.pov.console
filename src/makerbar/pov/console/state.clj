@@ -14,6 +14,8 @@
    
    :pov-offset [0 0]
    
+   :img-width pov-width
+   :img-height pov-height
    :img-offset [0 0]
    :img-scale 1
    

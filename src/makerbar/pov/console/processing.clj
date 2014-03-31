@@ -26,8 +26,10 @@
 (defn create-graphics
   ([width height] (.createGraphics (current-applet) width height)))
 
-(defn load-image
-  [filename] (.loadImage (current-applet) filename))
+(defn load-image [filename] (.loadImage (current-applet) filename))
+
+(defn cursor
+  ([c] (.cursor (current-applet) c)))
 
 
 ; Graphics binding
