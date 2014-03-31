@@ -7,9 +7,11 @@
   :dependencies [[extrapixel/gifAnimation "d734273"]
                  [org.clojure/clojure "1.6.0"]
                  [org.processing/core "2.1.1"]
-                 [org.processing/gstreamer-java "2.1.1"]
-                 [org.processing/jna "2.1.1"]
-                 [org.processing/video "2.1.1"]
+                 [org.processing.video/gstreamer-java "2.1.1"]
+                 [org.processing.video/jna "2.1.1"]
+                 [org.processing.video/video "2.1.1"]
                  [prismatic/hiphip "0.2.0"]]
+  :jvm-opts ["-Dgstreamer.library.path=lib/processing-2.1.1/video/macosx64"
+             "-Dgstreamer.plugin.path=lib/processing-2.1.1/video/macosx64/plugins"]
   :aot [makerbar.pov.console.ui]
   :main makerbar.pov.console.ui)

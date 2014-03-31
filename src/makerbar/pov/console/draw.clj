@@ -31,6 +31,7 @@
 
 (defn draw-image []
   (when-let [img (:image @s/state)]
+    (when (and (< 0 (.width img)) (< 0 (.height img)))
     ; draw scaled image to pov-graphics
     (p/with-graphics @pov-graphics
       (p/draw
@@ -71,4 +72,4 @@
                   y (range (- pov-y-offset s/pov-height) s/pov-height s/pov-height)]
             (p/image @tile-graphics x y)))))
   
-    (p/image @pov-graphics 0 0)))
+    (p/image @pov-graphics 0 0))))

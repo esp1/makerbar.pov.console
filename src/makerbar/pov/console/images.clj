@@ -2,7 +2,7 @@
   (:import [gifAnimation Gif]
            [javax.swing JFileChooser]
            [javax.swing.filechooser FileNameExtensionFilter]
-           [processing.video Movie])
+           [processing.video Capture Movie])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [makerbar.pov.console.processing :as p]
@@ -22,6 +22,7 @@
 
 
 (defmulti stop class)
+(defmethod stop Capture [camera] (.stop camera))
 (defmethod stop Gif [gif] (.stop gif))
 (defmethod stop Movie [movie] (.stop movie))
 (defmethod stop :default [this])
@@ -30,6 +31,10 @@
 (defn scale-image-instructions
   "Returns a map indicating the offset and scaling factor that should be used to scale and center the given image into the target dimensions."
   [img target-width target-height]
+  {:pre [(< 0 (.width img))
+         (< 0 (.height img))
+         (< 0 target-width)
+         (< 0 target-height)]}
   (let [img-width (.width img)
         img-height (.height img)]
     (if (< (/ img-width img-height) (/ target-width target-height))
@@ -58,28 +63,31 @@
     (when (= (.showOpenDialog file-chooser (p/current-applet))
              JFileChooser/APPROVE_OPTION)
       (get-image (.getSelectedFile file-chooser))))
-  ([index]
-    (if-let [{:keys [file image] :as image-info} (get @image-list index)]
-      (if image
-        image
-        (let [path (.getCanonicalPath file)
-              suffix (str/lower-case (subs path (.lastIndexOf path ".")))
-              img (condp = suffix
-                    ".gif" (do
-                             (println "GIF" path)
-                             (let [gif (Gif. (p/current-applet) path)]
-                               (.loop gif)
-                               gif))
-                    ".mov" (do
-                             (println "Movie file:" path)
-                             (let [movie (Movie. (p/current-applet) path)]
-                               (.loop movie)
-                               movie))
-                    (do
-                      (println "Image file:" path)
-                      (p/load-image path)))]
-          (swap! image-list assoc-in [index :image] img)
-          img)))))
+  ([file]
+    (let [path (.getCanonicalPath file)
+          suffix (str/lower-case (subs path (.lastIndexOf path ".")))]
+      (condp = suffix
+        ".gif" (do
+                 (println "GIF" path)
+                 (let [gif (Gif. (p/current-applet) path)]
+                   (.loop gif)
+                   gif))
+        ".mov" (do
+                 (println "Movie file:" path)
+                 (let [movie (Movie. (p/current-applet) path)]
+                   (.loop movie)
+                   movie))
+        (do
+          (println "Image file:" path)
+          (p/load-image path))))))
+
+(defn get-selected-image []
+  (if-let [{:keys [file image] :as image-info} (get @image-list @selected-image-index)]
+    (if image
+      image
+      (let [img (get-image file)]
+        (swap! image-list assoc-in [@selected-image-index :image] img)
+        img))))
 
 (defn inc-image-selection
   [di]

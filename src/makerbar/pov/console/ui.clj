@@ -1,6 +1,8 @@
 (ns makerbar.pov.console.ui
   (:gen-class
-    :extends processing.core.PApplet)
+    :extends processing.core.PApplet
+    :methods [[captureEvent [processing.video.Capture] void]
+              [movieEvent [processing.video.Movie] void]])
   (:import [processing.core PApplet])
   (:require [makerbar.pov.console.draw :as d]
             [makerbar.pov.console.images :as i]
@@ -55,7 +57,7 @@
     (p/translate (- (p/width) 500) 100)
     
     (p/with-matrix
-      (when-let [img (i/get-image @i/selected-image-index)]
+      (when-let [img (i/get-selected-image)]
         (let [{:keys [offset scale]} (i/scale-image-instructions img s/pov-width s/pov-height)]
           (p/translate offset)
           (p/scale scale)
@@ -65,7 +67,7 @@
       (p/stroke 255)
       (p/text (i/display-image-list) 0 120)))
   
-  ; instructions 
+  ; instructions
   (p/with-style
     (p/stroke 255)
     (p/text (k/display-keyboard-controls) 40 (- (p/height) 400)))
@@ -81,6 +83,10 @@
 (defn -setup [this] (p/with-applet this (setup)))
 (defn -sketchFullScreen [this] true)
 (defn -draw [this] (p/with-applet this (draw)))
+
 (defn -keyPressed [this event] (p/with-applet this (k/key-pressed event)))
+
+(defn -captureEvent [this camera] (.read camera))
+(defn -movieEvent [this movie] (.read movie))
 
 (defn -main [& args] (PApplet/main "makerbar.pov.console.ui"))
