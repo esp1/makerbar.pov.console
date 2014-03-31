@@ -1,12 +1,12 @@
 (ns makerbar.pov.console.images
   (:import [gifAnimation Gif]
            [javax.swing JFileChooser]
-           [javax.swing.filechooser FileNameExtensionFilter])
+           [javax.swing.filechooser FileNameExtensionFilter]
+           [processing.video Movie])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [makerbar.pov.console.state :as s]
-            [quil.applet :as a]
-            [quil.core :as q]))
+            [makerbar.pov.console.processing :as p]
+            [makerbar.pov.console.state :as s]))
 
 
 (defn list-images
@@ -23,6 +23,7 @@
 
 (defmulti stop class)
 (defmethod stop Gif [gif] (.stop gif))
+(defmethod stop Movie [movie] (.stop movie))
 (defmethod stop :default [this])
 
 
@@ -54,7 +55,7 @@
 
 (defn get-image
   ([]
-    (when (= (.showOpenDialog file-chooser (a/current-applet))
+    (when (= (.showOpenDialog file-chooser (p/current-applet))
              JFileChooser/APPROVE_OPTION)
       (get-image (.getSelectedFile file-chooser))))
   ([index]
@@ -66,13 +67,17 @@
               img (condp = suffix
                     ".gif" (do
                              (println "GIF" path)
-                             (let [gif (Gif. (a/current-applet) path)]
+                             (let [gif (Gif. (p/current-applet) path)]
                                (.loop gif)
                                gif))
-                    ".mov" (println "Movie file:" path)
+                    ".mov" (do
+                             (println "Movie file:" path)
+                             (let [movie (Movie. (p/current-applet) path)]
+                               (.loop movie)
+                               movie))
                     (do
                       (println "Image file:" path)
-                      (q/load-image path)))]
+                      (p/load-image path)))]
           (swap! image-list assoc-in [index :image] img)
           img)))))
 

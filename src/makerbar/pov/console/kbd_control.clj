@@ -1,12 +1,11 @@
 (ns makerbar.pov.console.kbd-control
     (:import [java.awt.event KeyEvent])
     (:require [makerbar.pov.console.images :as i]
-              [makerbar.pov.console.state :as s]
-              [quil.core :as q]))
+              [makerbar.pov.console.state :as s]))
 
-(defn key-pressed []
-  (let [factor (if #_shiftDown true 10 1)]
-    (condp = (q/key-code)
+(defn key-pressed [^KeyEvent event]
+  (let [factor (if (.isShiftDown event) 1 10)]
+    (condp = (.getKeyCode event)
       
       KeyEvent/VK_O (i/display-image (i/get-image))
       KeyEvent/VK_Z (i/inc-image-selection -1)
