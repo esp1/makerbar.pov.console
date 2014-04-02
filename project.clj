@@ -4,14 +4,18 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :profiles {:dev {:dependencies [[criterium "0.4.3"]]}}
-  :dependencies [[extrapixel/gifAnimation "d734273"]
+  :dependencies [[aleph "0.3.2"]
+                 [extrapixel/gifAnimation "d734273"]
+                 [leapmotion/LeapJava "1.0.9.8391"]
                  [org.clojure/clojure "1.6.0"]
+                 [org.clojure/core.async "0.1.278.0-76b25b-alpha"]
                  [org.processing/core "2.1.1"]
                  [org.processing.video/gstreamer-java "2.1.1"]
                  [org.processing.video/jna "2.1.1"]
                  [org.processing.video/video "2.1.1"]
                  [prismatic/hiphip "0.2.0"]]
-  :jvm-opts ["-Dgstreamer.library.path=lib/processing-2.1.1/video/macosx64"
+  :jvm-opts ["-Djava.library.path=lib/leapmotion-1.0.9.8391"
+             "-Dgstreamer.library.path=lib/processing-2.1.1/video/macosx64"
              "-Dgstreamer.plugin.path=lib/processing-2.1.1/video/macosx64/plugins"]
   :aot [makerbar.pov.console.ui]
-  :main makerbar.pov.console.ui)
+  :main makerbar.pov.console.leap)

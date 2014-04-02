@@ -12,6 +12,9 @@ mvn_install() {
 mvn_install gifAnimation.jar \
             extrapixel gifAnimation d734273
 
+mvn_install leapmotion-1.0.9.8391/LeapJava.jar \
+            leapmotion LeapJava 1.0.9.8391
+
 mvn_install processing-2.1.1/core/core.jar \
             org.processing core 2.1.1
 

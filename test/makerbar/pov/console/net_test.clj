@@ -1,4 +1,4 @@
-(ns makerbar.pov.console-test
+(ns makerbar.pov.console.net-test
   (:require [clojure.test :refer :all]
             [makerbar.pov.console :refer :all]))
 

@@ -6,7 +6,7 @@
 (def pov-width (* 4 56))
 (def pov-height (* 6 17))
 
-(def x2-addr "192.168.0.3")
+(def pov-addr "192.168.0.3")
 
 (def default-state
   {:brightness 0

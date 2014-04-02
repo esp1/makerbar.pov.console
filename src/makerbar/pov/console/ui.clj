@@ -45,11 +45,13 @@
     ; draw image
     (d/draw-image)
     
+    ; send image data to POV display
+;    (n/pov-send-data s/pov-addr (.pixels @d/pov-graphics))
+
+    ; draw frame
     (p/with-style
       (p/stroke 200)
       (p/no-fill)
-      
-      ; draw frame
       (p/rect -1 -1 (+ s/pov-width 1) (+ s/pov-height 1))))
   
   ; image list
@@ -59,9 +61,8 @@
     (p/with-matrix
       (when-let [img (i/get-selected-image)]
         (let [{:keys [offset scale]} (i/scale-image-instructions (.width img) (.height img) s/pov-width s/pov-height)]
-          (p/translate offset)
           (p/scale scale)
-          (p/image img 0 0))))
+          (p/image img offset))))
     
     (p/with-style
       (p/stroke 255)
@@ -75,9 +76,7 @@
   ; status
   (p/with-style
     (p/stroke 255)
-    (p/text (s/display-status) 400 (- (p/height) 400)))
-  
-  #_(x2-send))
+    (p/text (s/display-status) 400 (- (p/height) 400))))
 
 
 (defn -setup [this] (p/with-applet this (setup)))
