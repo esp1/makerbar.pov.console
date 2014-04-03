@@ -4,10 +4,12 @@
     :methods [[captureEvent [processing.video.Capture] void]
               [movieEvent [processing.video.Movie] void]])
   (:import [processing.core PApplet])
-  (:require [clojure.tools.cli :as cli]
+  (:require [clojure.core.async :as async]
+            [clojure.tools.cli :as cli]
             [makerbar.pov.console.draw :as d]
             [makerbar.pov.console.images :as i]
             [makerbar.pov.console.kbd-control :as k]
+            [makerbar.pov.console.leap :as l]
             [makerbar.pov.console.net :as n]
             [makerbar.pov.console.processing :as p]
             [makerbar.pov.console.state :as s]))
@@ -103,4 +105,8 @@
     (if (not (nil? host))
       (reset! s/pov-addr {:host host
                           :port port})))
+  
+  (let [ch (l/init-leap)]
+    (.addShutdownHook (Runtime/getRuntime) (Thread. #(async/close! ch))))
+  
   (PApplet/main "makerbar.pov.console.ui"))
