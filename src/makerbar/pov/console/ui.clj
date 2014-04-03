@@ -7,6 +7,7 @@
   (:require [makerbar.pov.console.draw :as d]
             [makerbar.pov.console.images :as i]
             [makerbar.pov.console.kbd-control :as k]
+            [makerbar.pov.console.net :as n]
             [makerbar.pov.console.processing :as p]
             [makerbar.pov.console.state :as s]))
 
@@ -46,7 +47,7 @@
     (d/draw-image)
     
     ; send image data to POV display
-;    (n/pov-send-data s/pov-addr (.pixels @d/pov-graphics))
+    (n/pov-send-data s/pov-addr (.pixels @d/pov-graphics))
 
     ; draw frame
     (p/with-style

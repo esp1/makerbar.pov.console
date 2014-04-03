@@ -1,10 +1,11 @@
 (defproject makerbar.pov.console "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "POV Console UI"
+  :url "http://www.makerbar.com/"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :profiles {:dev {:dependencies [[criterium "0.4.3"]]}}
   :dependencies [[aleph "0.3.2"]
+                 [byte-streams "0.1.10"]
                  [extrapixel/gifAnimation "d734273"]
                  [leapmotion/LeapJava "1.0.9.8391"]
                  [org.clojure/clojure "1.6.0"]
@@ -18,4 +19,4 @@
              "-Dgstreamer.library.path=lib/processing-2.1.1/video/macosx64"
              "-Dgstreamer.plugin.path=lib/processing-2.1.1/video/macosx64/plugins"]
   :aot [makerbar.pov.console.ui]
-  :main makerbar.pov.console.leap)
+  :main makerbar.pov.console.ui)
