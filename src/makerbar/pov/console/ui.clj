@@ -4,7 +4,8 @@
     :methods [[captureEvent [processing.video.Capture] void]
               [movieEvent [processing.video.Movie] void]])
   (:import [processing.core PApplet])
-  (:require [makerbar.pov.console.draw :as d]
+  (:require [clojure.tools.cli :as cli]
+            [makerbar.pov.console.draw :as d]
             [makerbar.pov.console.images :as i]
             [makerbar.pov.console.kbd-control :as k]
             [makerbar.pov.console.net :as n]
@@ -47,7 +48,9 @@
     (d/draw-image)
     
     ; send image data to POV display
-    (n/pov-send-data s/pov-addr (.pixels @d/pov-graphics))
+    (if-let [pov-addr @s/pov-addr]
+      (if-let [data (.pixels @d/pov-graphics)]
+        (n/pov-send-data pov-addr data)))
 
     ; draw frame
     (p/with-style
@@ -89,4 +92,15 @@
 (defn -captureEvent [this camera] (.read camera))
 (defn -movieEvent [this movie] (.read movie))
 
-(defn -main [& args] (PApplet/main "makerbar.pov.console.ui"))
+(defn -main
+  [& args]
+  (let [{{host :host
+          port :port} :options} (cli/parse-opts args
+                                                [["-h" "--host HOST" "Host IP address"]
+                                                 ["-p" "--port PORT" "Port number"
+                                                  :default 10000
+                                                  :parse-fn #(Integer/parseInt %)]])]
+    (if (not (nil? host))
+      (reset! s/pov-addr {:host host
+                          :port port})))
+  (PApplet/main "makerbar.pov.console.ui"))

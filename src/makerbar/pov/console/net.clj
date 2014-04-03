@@ -3,11 +3,11 @@
             [byte-streams :as b]
             [gloss.core :as g :refer (defcodec header)]
             [gloss.io :as io :refer (decode encode)]
-            [lamina.core :as l]))
+            [lamina.core :as l]
+            [makerbar.pov.console.state :as s]))
 
-(defn get-ch
-  [host]
-  (l/wait-for-result (tcp-client {:host host, :port 10000})))
+(defn get-ch [addr]
+  (l/wait-for-result (tcp-client addr)))
 
 (defcodec send-data-codec
   (header #_frame :byte  ; \0
@@ -45,32 +45,32 @@
 (def ^:private ^:const iarray (class (clojure.core/int-array 0)))
 
 (defn pov-send-data
-  [host data]
+  [addr data]
   (if data
-    (let [ch (get-ch host)]
+    (let [ch (get-ch addr)]
       (l/enqueue ch (encode send-data-codec (seq data))))))
 ;    (decode return-stats-codec (.toByteBuffer (wait-for-message ch)))))
 
-(defn pov-get-stats
-  [host]
-  (let [ch (get-ch host)]
-    (l/enqueue ch (encode command-codec \?))
-    (io/decode return-stats-codec (.toByteBuffer (l/wait-for-message ch)))))
-
-(defn pov-set-x-offset
-  [host value]
-  (let [ch (get-ch host)]
-    (l/enqueue ch (encode set-x-offset-codec value))))
+;(defn pov-get-stats
+;  [host]
+;  (let [ch (get-ch host)]
+;    (l/enqueue ch (encode command-codec \?))
+;    (io/decode return-stats-codec (.toByteBuffer (l/wait-for-message ch)))))
+;
+;(defn pov-set-x-offset
+;  [host value]
+;  (let [ch (get-ch host)]
+;    (l/enqueue ch (encode set-x-offset-codec value))))
 ;    (:value (decode return-int-codec (.toByteBuffer (wait-for-message ch))))))
-
-(defn pov-set-brightness
-  [host value]
-  (let [ch (get-ch host)]
-    (l/enqueue ch (encode set-brightness-codec value))))
+;
+;(defn pov-set-brightness
+;  [host value]
+;  (let [ch (get-ch host)]
+;    (l/enqueue ch (encode set-brightness-codec value))))
 ;    (:value (decode return-float-codec (.toByteBuffer (wait-for-message ch))))))
-
-(defn pov-set-contrast
-  [host value]
-  (let [ch (get-ch host)]
-    (l/enqueue ch (encode set-contrast-codec value))))
+;
+;(defn pov-set-contrast
+;  [host value]
+;  (let [ch (get-ch host)]
+;    (l/enqueue ch (encode set-contrast-codec value))))
 ;    (:value (decode return-float-codec (.toByteBuffer (wait-for-message ch))))))
