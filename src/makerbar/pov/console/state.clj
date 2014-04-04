@@ -9,7 +9,9 @@
 (def pov-addr (atom nil))
 
 (def default-state
-  {:brightness 0
+  {:console-fade 0
+   
+   :brightness 0
    :contrast 1
    
    :pov-offset [0 0]
@@ -20,7 +22,7 @@
    :img-scale 1
    
    :rotation-direction 1
-   :rotation-speed 2
+   :rotation-speed 0
    :flip-image false})
 
 
@@ -30,6 +32,14 @@
 
 
 ; Functions
+
+(defn get-state
+  ([] @state)
+  ([attr] (get @state attr)))
+
+(defn set-state!
+  [attr val]
+  (swap! state assoc attr val))
 
 (defn wrapped
   ([value range]

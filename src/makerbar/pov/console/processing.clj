@@ -78,6 +78,9 @@
      ~@body
      (.endDraw (current-graphics))))
 
+(defn fill
+  ([gray alpha] (.fill (current-graphics) gray gray gray alpha)))
+
 (defn image
   ([img [x y]] (image img x y))
   ([img x y] (.image (current-graphics) img x y)))

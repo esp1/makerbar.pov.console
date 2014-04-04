@@ -82,7 +82,12 @@
   ; status
   (p/with-style
     (p/stroke 255)
-    (p/text (s/display-status) 400 (- (p/height) 400))))
+    (p/text (s/display-status) 400 (- (p/height) 400)))
+  
+  ; fade overlay
+  (p/with-style
+    (p/fill 0 (s/get-state :console-fade))
+    (p/rect 0 0 (p/width) (p/height))))
 
 
 (defn -setup [this] (p/with-applet this (setup)))
