@@ -28,10 +28,10 @@
     (p/translate (- (p/width)) 0))
   
   ; clear
-  (p/background 100)
+  (p/background 0)
   
   ; info
-  (p/text (str "Display dimensions: " s/pov-width " x " s/pov-height) 40 (- 80 20 (p/text-descent)))
+  #_(p/text (str "Display dimensions: " s/pov-width " x " s/pov-height) 40 (- 80 20 (p/text-descent)))
   
   (let [t @time-t
         now (System/currentTimeMillis)
@@ -39,16 +39,21 @@
     (reset! time-t now)
     
     ; display frames per second
-    (p/with-style
-      (p/stroke 255)
-      (p/text (str "Processing FPS: " (format "%.1f" fps)) 40 40))
+    #_(p/with-style
+       (p/stroke 255)
+       (p/text (str "Processing FPS: " (format "%.1f" fps)) 40 40))
     
     ; rotate
     (s/inc-pov-offset [(* (s/get-state :rotation-speed) (s/get-state :rotation-direction)) 0]))
   
   (p/with-matrix
-    (p/translate 40 80)
-    (p/scale 3)
+;    (p/translate 40 80)
+;    (p/scale 3)
+    
+    (let [{:keys [offset scale]} (i/scale-image-instructions s/pov-width s/pov-height (* 0.9 (p/width)) (* 0.9 (p/height)))]
+      (p/translate (* 0.05 (p/width)) (* 0.05 (p/height)))
+      (p/translate offset)
+      (p/scale scale))    
     
     ; draw image
     (d/draw-image)
@@ -59,34 +64,34 @@
         (n/pov-send-data pov-addr data)))
 
     ; draw frame
-    (p/with-style
-      (p/stroke 200)
-      (p/no-fill)
-      (p/rect -1 -1 (+ s/pov-width 1) (+ s/pov-height 1))))
+    #_(p/with-style
+       (p/stroke 200)
+       (p/no-fill)
+       (p/rect -1 -1 (+ s/pov-width 1) (+ s/pov-height 1))))
   
   ; image list
-  (p/with-matrix
-    (p/translate (- (p/width) 500) 100)
+  #_(p/with-matrix
+     (p/translate (- (p/width) 500) 100)
     
-    (p/with-matrix
-      (when-let [img (i/get-selected-image)]
-        (let [{:keys [offset scale]} (i/scale-image-instructions (.width img) (.height img) s/pov-width s/pov-height)]
-          (p/scale scale)
-          (p/image img offset))))
+     (p/with-matrix
+       (when-let [img (i/get-selected-image)]
+         (let [{:keys [offset scale]} (i/scale-image-instructions (.width img) (.height img) s/pov-width s/pov-height)]
+           (p/scale scale)
+           (p/image img offset))))
     
-    (p/with-style
-      (p/stroke 255)
-      (p/text (i/display-image-list) 0 120)))
+     (p/with-style
+       (p/stroke 255)
+       (p/text (i/display-image-list) 0 120)))
   
   ; instructions
-  (p/with-style
-    (p/stroke 255)
-    (p/text (k/display-keyboard-controls) 40 (- (p/height) 400)))
+  #_(p/with-style
+     (p/stroke 255)
+     (p/text (k/display-keyboard-controls) 40 (- (p/height) 400)))
   
   ; status
-  (p/with-style
-    (p/stroke 255)
-    (p/text (s/display-status) 400 (- (p/height) 400)))
+  #_(p/with-style
+     (p/stroke 255)
+     (p/text (s/display-status) 400 (- (p/height) 400)))
   
   ; fade overlay
   (p/with-style
