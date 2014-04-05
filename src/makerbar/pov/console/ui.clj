@@ -23,6 +23,10 @@
 (def time-t (atom (System/currentTimeMillis)))
 
 (defn draw []
+  (when (s/get-state :console-mirror)
+    (p/scale -1.0 1.0)
+    (p/translate (- (p/width)) 0))
+  
   ; clear
   (p/background 100)
   
@@ -101,15 +105,16 @@
 
 (defn -main
   [& args]
-  (let [{{host :host
-          port :port} :options} (cli/parse-opts args
-                                                [["-h" "--host HOST" "Host IP address"]
-                                                 ["-p" "--port PORT" "Port number"
-                                                  :default 10000
-                                                  :parse-fn #(Integer/parseInt %)]])]
-    (if (not (nil? host))
-      (reset! s/pov-addr {:host host
-                          :port port})))
+  (let [{{:keys [host port mirror]} :options} (cli/parse-opts args
+                                                              [["-h" "--host HOST" "Host IP address"]
+                                                               ["-p" "--port PORT" "Port number"
+                                                                :default 10000
+                                                                :parse-fn #(Integer/parseInt %)]
+                                                               ["-m" "--mirror" "Mirror console display"]])]
+    (if host
+      (s/set-pov-addr! {:host host
+                        :port port}))
+    (if mirror (s/set-state! :console-mirror mirror)))
   
   (let [ch (l/init-leap)]
     (.addShutdownHook (Runtime/getRuntime) (Thread. #(async/close! ch))))

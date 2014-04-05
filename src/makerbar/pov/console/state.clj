@@ -6,10 +6,9 @@
 (def pov-width (* 4 56))
 (def pov-height (* 6 17))
 
-(def pov-addr (atom nil))
-
 (def default-state
-  {:console-fade 0
+  {:console-mirror false
+   :console-fade 0
    
    :brightness 0
    :contrast 1
@@ -28,10 +27,14 @@
 
 ; State
 
+(def pov-addr (atom nil))
 (def state (atom default-state))
 
 
 ; Functions
+
+(defn get-pov-addr [] @pov-addr)
+(defn set-pov-addr! [addr] (reset! pov-addr addr))
 
 (defn get-state
   ([] @state)

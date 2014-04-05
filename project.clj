@@ -10,6 +10,7 @@
                  [leapmotion/LeapJava "1.0.9.8391"]
                  [org.clojure/clojure "1.6.0"]
                  [org.clojure/core.async "0.1.278.0-76b25b-alpha"]
+                 [org.clojure/math.numeric-tower "0.0.4"]
                  [org.clojure/tools.cli "0.3.1"]
                  [org.processing/core "2.1.1"]
                  [org.processing.video/gstreamer-java "2.1.1"]
