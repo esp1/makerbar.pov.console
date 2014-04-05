@@ -7,10 +7,7 @@
 (def pov-height (* 6 17))
 
 (def default-state
-  {:console-mirror false
-   :console-fade 0
-   
-   :brightness 0
+  {:brightness 0
    :contrast 1
    
    :pov-offset [0 0]
@@ -24,11 +21,16 @@
    :rotation-speed 0
    :flip-image false})
 
+(def initial-state
+  (merge default-state
+         {:console-mirror false
+          :console-fade 0}))
+
 
 ; State
 
 (def pov-addr (atom nil))
-(def state (atom default-state))
+(def state (atom initial-state))
 
 
 ; Functions
@@ -43,6 +45,10 @@
 (defn set-state!
   ([attr val] (swap! state assoc attr val))
   ([attr1 val1 attr2 val2] (swap! state assoc attr1 val1 attr2 val2)))
+
+(defn update-state!
+  [attr f]
+  (swap! state update-in [attr] f))
 
 (defn wrapped
   ([value range]
@@ -72,7 +78,7 @@
 (defn inc-brightness [db] (swap! state update-in [:brightness] #(+ % db)))
 (defn inc-contrast [dc] (swap! state update-in [:contrast] #(max 1 (+ % dc))))
 
-(defn reset-settings [] (reset! state default-state))
+(defn reset-settings [] (reset! state (merge @state default-state)))
 
 (defn display-status []
   (apply str (map (fn [[key val]]
