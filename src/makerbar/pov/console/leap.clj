@@ -93,10 +93,12 @@
                                         [x0 y0] :img-offset
                                         s0 :img-scale
                                         d0 :distance} @start-pan-zoom
+                                       ; pan
                                        [dx dy dz] (as-vec (.translation frame start-frame))
+                                       box (.interactionBox frame)
+                                       ; zoom
                                        [left-x left-y left-z] (as-vec (.palmPosition left-hand))
-                                       [right-x right-y right-z] (as-vec (.palmPosition right-hand))
-                                       box (.interactionBox frame)]
+                                       [right-x right-y right-z] (as-vec (.palmPosition right-hand))]
                                    (s/set-state! :img-offset [(+ x0 (* s/pov-width (/ dx (.width box)))) (+ y0 (- (* s/pov-height (/ dy (.height box)))))])
                                    (s/set-state! :img-scale (* s0 (/ (hand-distance left-hand right-hand) d0)))))
                                (reset! start-pan-zoom nil)))
