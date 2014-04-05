@@ -6,8 +6,7 @@
             [makerbar.pov.console.state :as s]))
 
 
-(def start-scale-frame (atom nil))
-(def start-pan (atom nil))
+(def start-pan-zoom (atom nil))
 
 
 (defn duration
@@ -24,6 +23,15 @@
    (- (.getY v1) (.getY v0))
    (- (.getZ v1) (.getZ v0))])
 
+(defn distance
+  [v0 v1]
+  (sqrt (reduce + (map #(expt % 2) (map - v1 v0)))))
+
+(defn hand-distance
+  [h0 h1]
+  (distance (as-vec (.palmPosition h0)) (as-vec (.palmPosition h1))))
+
+
 ; Console functions
 
 (defn fade-console
@@ -38,6 +46,12 @@
         (s/set-state! :console-fade (float fade))
         (<!! (async/timeout 50))))))
 
+(defn spin-image
+  [dx]
+  (s/set-state! :rotation-speed (Math/max -10 (Math/min 10 (+ (s/get-state :rotation-speed) dx)))))
+
+
+
 (defn init-leap []
   (let [controller (Controller.)
         fade-ch (async/chan (async/sliding-buffer 1))
@@ -47,13 +61,10 @@
                    (onConnect [controller]
                      (println "Leap connected")
                      (.enableGesture controller Gesture$Type/TYPE_SWIPE)
-                     #_(.enableGesture controller Gesture$Type/TYPE_CIRCLE)
                      (let [config (.config controller)]
                        (if (and
                               (.setFloat config "Gesture.Swipe.MinLength" 200.0)
-                              (.setFloat config "Gesture.Swipe.MinVelocity" 750.0)
-                              (.setFloat config "Gesture.Circle.MinRadius" 10.0)
-                              (.setFloat config "Gesture.Circle.MinArc" 0.5))
+                              (.setFloat config "Gesture.Swipe.MinVelocity" 750.0))
                          (.save config))))
                    (onDisconnect [controller]
                      (println "Leap disconnected"))
@@ -63,44 +74,39 @@
                      (let [frame (.frame controller)
                            hands (.hands frame)
                            num-hands (.count hands)]
-                       (if (< 0 num-hands)
+                       (if (> num-hands 0)
                          (put! fade-ch true)
                          (put! fade-ch false))
-                         
-                         (condp = num-hands
-                           2 (let [left-hand (.leftmost hands)
-                                   right-hand (.rightmost hands)]
-                               #_(if (and (= 0 (-> left-hand .fingers .count))
-                                          (= 0 (-> right-hand .fingers .count)))
-                                   (if (nil? @start-scale-frame)
-                                     (do (println "start scale") (reset! start-scale-frame frame))
-                                     (do
-                                       (println "scale" (.scaleFactor frame @start-scale-frame))
-                                       (s/set-state! :img-scale (* (s/get-state :img-scale) (.scaleFactor frame @start-scale-frame)))))
-                                   (reset! start-scale-frame nil)))
-                           1 (do
-                               (let [hand (.get hands 0)
-                                     num-fingers (-> hand .fingers .count)]
-                                 (if (<= num-fingers 1)
-                                   (if (nil? @start-pan)
-                                     (reset! start-pan {:start-frame frame
-                                                        :img-offset (s/get-state :img-offset)})
-                                     (let [{start-frame :start-frame
-                                            [x0 y0] :img-offset} @start-pan
-                                           [dx dy dz] (as-vec (.translation hand start-frame))
-                                           box (.interactionBox frame)]
-                                       (s/set-state! :img-offset [(+ x0 (* s/pov-width (/ dx (.width box)))) (+ y0 (- (* s/pov-height (/ dz (.height box)))))])))
-                                   (reset! start-pan nil)))
-                               (doseq [gesture (.gestures frame)]
-                                 (condp = (.type gesture)
-                                   Gesture$Type/TYPE_SWIPE (let [swipe (SwipeGesture. gesture)]
-                                                             (println "swipe" (.direction swipe)))
-                                   Gesture$Type/TYPE_CIRCLE (let [circle (CircleGesture. gesture)
-                                                                  normal-z (.getZ (.normal circle))
-                                                                  duration (.durationSeconds circle)]
-                                                              (if (< 0.5 duration)
-                                                                (println "circle" (if (< 0 normal-z) "counterclockwise" "clockwise") duration))))))
-                           nil))))
+                       
+                       (condp = num-hands
+                         2 (let [left-hand (.leftmost hands)
+                                 right-hand (.rightmost hands)]
+                             (if (and
+                                   (<= (-> left-hand .fingers .count) 1)
+                                   (<= (-> right-hand .fingers .count) 1))
+                               (if (nil? @start-pan-zoom)
+                                 (reset! start-pan-zoom {:start-frame frame
+                                                         :img-offset (s/get-state :img-offset)
+                                                         :img-scale (s/get-state :img-scale)
+                                                         :distance (hand-distance left-hand right-hand)})
+                                 (let [{start-frame :start-frame
+                                        [x0 y0] :img-offset
+                                        s0 :img-scale
+                                        d0 :distance} @start-pan-zoom
+                                       [dx dy dz] (as-vec (.translation frame start-frame))
+                                       [left-x left-y left-z] (as-vec (.palmPosition left-hand))
+                                       [right-x right-y right-z] (as-vec (.palmPosition right-hand))
+                                       box (.interactionBox frame)]
+                                   (s/set-state! :img-offset [(+ x0 (* s/pov-width (/ dx (.width box)))) (+ y0 (- (* s/pov-height (/ dy (.height box)))))])
+                                   (s/set-state! :img-scale (* s0 (/ (hand-distance left-hand right-hand) d0)))))
+                               (reset! start-pan-zoom nil)))
+                         1 (doseq [gesture (.gestures frame)]
+                             (condp = (.type gesture)
+                               Gesture$Type/TYPE_SWIPE (let [swipe (SwipeGesture. gesture)]
+                                                         (if (> (.getX (.direction swipe)) 0)
+                                                           (spin-image 1)
+                                                           (spin-image -1)))))
+                         nil))))
         control-ch (async/chan)]
     (.addListener controller listener)
     
@@ -108,7 +114,7 @@
              (condp = ch
                fade-ch (do
                          (fade-console val)
-                         (recur (alts! [control-ch fade-ch]))))
-             control-ch (.removeListener controller listener))
+                         (recur (alts! [control-ch fade-ch])))
+               control-ch (.removeListener controller listener)))
     
     control-ch))
