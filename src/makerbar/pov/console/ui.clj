@@ -24,7 +24,7 @@
 
 (defn draw []
   (when (s/get-state :console-mirror)
-    (p/scale -1.0 1.0)
+    (p/scale -1 1)
     (p/translate (- (p/width)) 0))
   
   ; clear
@@ -44,7 +44,7 @@
       (p/text (str "Processing FPS: " (format "%.1f" fps)) 40 40))
     
     ; rotate
-    (s/inc-pov-offset [(* (:rotation-speed @s/state) (:rotation-direction @s/state)) 0]))
+    (s/inc-pov-offset [(* (s/get-state :rotation-speed) (s/get-state :rotation-direction)) 0]))
   
   (p/with-matrix
     (p/translate 40 80)

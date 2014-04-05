@@ -56,18 +56,18 @@
 
 (defn display-image
   [img]
-  (stop (:image @s/state))
+  (stop (s/get-state :image))
   
   (s/reset-settings)
   
-  (swap! s/state assoc :image img)
+  (s/set-state! :image img)
 
   (let [img-width (.width img)
         img-height (.height img)]
     (if (and (< 0 img-width) (< 0 img-height))
-      (swap! s/state assoc
-             :img-width img-width
-             :img-height img-height))))
+      (s/set-state!
+        :img-width img-width
+        :img-height img-height))))
 
 (defn get-image
   ([]
@@ -142,9 +142,9 @@
                                         {(keyword key) val}))
             {size :size} camera-props
             [width height] (str/split size #"x")]
-        (swap! s/state assoc
-               :image-width (Integer/valueOf width)
-               :image-height (Integer/valueOf height))
+        (s/set-state!
+          :image-width (Integer/valueOf width)
+          :image-height (Integer/valueOf height))
         
         (let [camera (Capture. (p/current-applet) selected-camera)]
           (.start camera)

@@ -41,8 +41,8 @@
   ([attr] (get @state attr)))
 
 (defn set-state!
-  [attr val]
-  (swap! state assoc attr val))
+  ([attr val] (swap! state assoc attr val))
+  ([attr1 val1 attr2 val2] (swap! state assoc attr1 val1 attr2 val2)))
 
 (defn wrapped
   ([value range]

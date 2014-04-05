@@ -30,7 +30,7 @@
     (bit-or 0xff000000 (bit-shift-left r 16) (bit-shift-left g 8) b)))
 
 (defn draw-image []
-  (when-let [img (:image @s/state)]
+  (when-let [img (s/get-state :image)]
     (when (and (< 0 (.width img)) (< 0 (.height img)))
     ; draw scaled image to pov-graphics
     (p/with-graphics @pov-graphics
@@ -41,7 +41,7 @@
           (p/image img offset))
             
         ; flip image
-        (when (:flip-image @s/state)
+        (when (s/get-state :flip-image)
           (p/scale -1 1)
           (p/translate (- (- s/pov-width 1)) 0))))
     
