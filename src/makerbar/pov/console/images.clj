@@ -56,18 +56,19 @@
 
 (defn display-image
   [img]
-  (stop (s/get-state :image))
-  
-  (s/reset-settings)
-  
-  (s/set-state! :image img)
-
-  (let [img-width (.width img)
-        img-height (.height img)]
-    (if (and (< 0 img-width) (< 0 img-height))
-      (s/set-state!
-        :img-width img-width
-        :img-height img-height))))
+  (when img
+    (stop (s/get-state :image))
+    
+    (s/reset-settings)
+    
+    (s/set-state! :image img)
+    
+    (let [img-width (.width img)
+          img-height (.height img)]
+      (if (and (< 0 img-width) (< 0 img-height))
+        (s/set-state!
+          :img-width img-width
+          :img-height img-height)))))
 
 (defn get-image
   ([]

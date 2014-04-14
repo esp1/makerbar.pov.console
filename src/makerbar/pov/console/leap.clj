@@ -6,7 +6,8 @@
             [makerbar.pov.console.state :as s]))
 
 
-(def start-pan-zoom (atom nil))
+(def start-pan (atom nil))
+(def start-zoom (atom nil))
 
 
 (defn duration
@@ -60,12 +61,12 @@
                      (println "Leap initialized"))
                    (onConnect [controller]
                      (println "Leap connected")
-                     (.enableGesture controller Gesture$Type/TYPE_SWIPE)
-                     (let [config (.config controller)]
-                       (if (and
+                     #_(.enableGesture controller Gesture$Type/TYPE_SWIPE)
+                     #_(let [config (.config controller)]
+                        (if (and
                               (.setFloat config "Gesture.Swipe.MinLength" 200.0)
                               (.setFloat config "Gesture.Swipe.MinVelocity" 750.0))
-                         (.save config))))
+                          (.save config))))
                    (onDisconnect [controller]
                      (println "Leap disconnected"))
                    (onExit [controller]
@@ -84,30 +85,36 @@
                              (if (and
                                    (<= (-> left-hand .fingers .count) 1)
                                    (<= (-> right-hand .fingers .count) 1))
-                               (if (nil? @start-pan-zoom)
-                                 (reset! start-pan-zoom {:start-frame frame
-                                                         :img-offset (s/get-state :img-offset)
-                                                         :img-scale (s/get-state :img-scale)
-                                                         :distance (hand-distance left-hand right-hand)})
-                                 (let [{start-frame :start-frame
-                                        [x0 y0] :img-offset
-                                        s0 :img-scale
-                                        d0 :distance} @start-pan-zoom
-                                       ; pan
-                                       [dx dy dz] (as-vec (.translation frame start-frame))
-                                       box (.interactionBox frame)
+                               (if (nil? @start-zoom)
+                                 (reset! start-zoom {:img-scale (s/get-state :img-scale)
+                                                     :distance (hand-distance left-hand right-hand)})
+                                 (let [{s0 :img-scale
+                                        d0 :distance} @start-zoom
                                        ; zoom
                                        [left-x left-y left-z] (as-vec (.palmPosition left-hand))
                                        [right-x right-y right-z] (as-vec (.palmPosition right-hand))]
-                                   (s/set-state! :img-offset [(+ x0 (* s/pov-width (/ dx (.width box)))) (+ y0 (- (* s/pov-height (/ dy (.height box)))))])
                                    (s/set-state! :img-scale (* s0 (/ (hand-distance left-hand right-hand) d0)))))
-                               (reset! start-pan-zoom nil)))
-                         1 (doseq [gesture (.gestures frame)]
-                             (condp = (.type gesture)
-                               Gesture$Type/TYPE_SWIPE (let [swipe (SwipeGesture. gesture)]
-                                                         (if (> (.getX (.direction swipe)) 0)
-                                                           (spin-image 1)
-                                                           (spin-image -1)))))
+                               (reset! start-zoom nil)))
+                         1 (do
+                             (if (<= (-> (.get hands 0) .fingers .count) 1)
+                               (if (nil? @start-pan)
+                                 (reset! start-pan {:start-frame frame
+                                                    :img-offset (s/get-state :img-offset)})
+                                 (let [{start-frame :start-frame
+                                        [x0 y0] :img-offset} @start-pan
+                                       ; pan
+                                       [dx dy dz] (as-vec (.translation frame start-frame))
+                                       box (.interactionBox frame)]
+                                   (s/set-state! :img-offset [(+ x0 (* s/pov-width (/ dx (.width box)))) (+ y0 (- (* s/pov-height (/ dy (.height box)))))])))
+                               (reset! start-pan nil))
+                             
+                             #_(doseq [gesture (.gestures frame)]
+                                (condp = (.type gesture)
+                                  Gesture$Type/TYPE_SWIPE (let [swipe (SwipeGesture. gesture)]
+                                                            (if (> (.getX (.direction swipe)) 0)
+                                                              (i/inc-image-selection 1)
+                                                              (i/inc-image-selection -1))
+                                                            (i/display-image (i/get-selected-image))))))
                          nil))))
         control-ch (async/chan)]
     (.addListener controller listener)
