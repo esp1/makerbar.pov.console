@@ -1,4 +1,4 @@
-(ns makerbar.pov.console.serial
+(ns makerbar.pov.console.controller.ddr
   (:require [serial.core :as serial]))
 
 (defn read-byte
@@ -18,16 +18,16 @@
           (prn "pad:" pad-id "cardinal:" cardinal-buttons "diagonal:" diagonal-buttons)
           (read-byte in-stream 0xFF))))))
 
-(defn init-serial []
+(defn init-ddr []
   (if-let [port-id (first (filter #(.startsWith % "tty.usbserial-")
                                   (map #(.getName %)
                                        (serial/port-identifiers))))]
     (let [port (serial/open port-id)]
-      (println "Connected to serial port" port-id)
+      (println "Connected to DDR serial port" port-id)
       (serial/listen! port ddr-handler)
 
       (.addShutdownHook (Runtime/getRuntime)
                         (Thread. #(do
-                                   (println "Closing serial port" port-id)
+                                   (println "Closing DDR serial port" port-id)
                                    (serial/close port)))))
     (println "DDR controllers not detected")))

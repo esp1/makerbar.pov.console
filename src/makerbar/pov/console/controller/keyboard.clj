@@ -1,4 +1,4 @@
-(ns makerbar.pov.console.kbd-control
+(ns makerbar.pov.console.controller.keyboard
     (:import [java.awt.event KeyEvent])
     (:require [makerbar.pov.console.images :as i]
               [makerbar.pov.console.state :as s]))

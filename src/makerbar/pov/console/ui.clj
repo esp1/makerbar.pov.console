@@ -6,12 +6,12 @@
   (:import [processing.core PApplet])
   (:require [clojure.core.async :as async]
             [clojure.tools.cli :as cli]
+            [makerbar.pov.console.controller.ddr :as ddr]
+            [makerbar.pov.console.controller.keyboard :as k]
             [makerbar.pov.console.draw :as d]
             [makerbar.pov.console.images :as i]
-            [makerbar.pov.console.kbd-control :as k]
             [makerbar.pov.console.net :as n]
             [makerbar.pov.console.processing :as p]
-            [makerbar.pov.console.serial :as serial]
             [makerbar.pov.console.state :as s]))
 
 
@@ -123,6 +123,6 @@
                         :port port}))
     (if mirror (s/set-state! :console-mirror mirror))
 
-    (serial/init-serial))
+    (ddr/init-ddr))
 
   (PApplet/main "makerbar.pov.console.ui"))

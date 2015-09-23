@@ -12,7 +12,7 @@
 
 (defn image-file? [f]
   (when (.isFile f)
-    (let [extension (-> f .getName (str/replace #"^.*\." "") .toLowerCase)]
+    (let [extension (-> f .getName (str/replace #"^.*\." "") str/lower-case)]
       (some #{extension} ["gif" "jpg" "mov" "png"]))))
 
 (defn list-images
