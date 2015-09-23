@@ -28,9 +28,6 @@
 Psx psxA;
 Psx psxB;
 
-unsigned int refDataA = 0;
-unsigned int refDataB = 0;
-
 void setup()
 {
   // setupPins(dataPin, cmndPin, attPin, clockPin, delay_microseconds);
@@ -39,8 +36,7 @@ void setup()
   Serial.begin(115200);
 }
 
-unsigned int update(byte pad, unsigned int data, unsigned int refData) {
-  if (data != refData) {
+void update(byte pad, unsigned int data) {
     Serial.write(0xAA);
     Serial.write(pad);
     Serial.write(data & 0x000F);
@@ -55,17 +51,12 @@ unsigned int update(byte pad, unsigned int data, unsigned int refData) {
 //    Serial.print("0");
 //    Serial.print((data & 0x0F00) >> 8);
 //    Serial.println("FF");
-    
-    return data;
-  } else {
-    return refData;
-  }
 }
 
 void loop()
 {
-  refDataA = update(PAD_A, psxA.read() & 0x0F0F, refDataA);
-  refDataB = update(PAD_B, psxB.read() & 0x0F0F, refDataB);
+  update(PAD_A, psxA.read() & 0x0F0F);
+  update(PAD_B, psxB.read() & 0x0F0F);
   
   delay(20);
 }
