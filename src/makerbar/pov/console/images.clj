@@ -10,10 +10,15 @@
             [makerbar.pov.console.state :as s]))
 
 
+(defn image-file? [f]
+  (when (.isFile f)
+    (let [extension (-> f .getName (str/replace #"^.*\." "") .toLowerCase)]
+      (some #{extension} ["gif" "jpg" "mov" "png"]))))
+
 (defn list-images
   [path]
   (mapv (fn [f] {:file f})
-       (filterv #(.isFile %)
+       (filterv #(image-file? %)
                 (mapv #(io/file path %)
                      (-> (io/file path) .list sort)))))
 

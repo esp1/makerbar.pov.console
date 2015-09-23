@@ -6,8 +6,8 @@
   :profiles {:dev {:dependencies [[criterium "0.4.3"]]}}
   :dependencies [[aleph "0.3.2"]
                  [byte-streams "0.1.10"]
+                 [clj-serial "2.0.4-SNAPSHOT"]
                  [extrapixel/gifAnimation "d734273"]
-                 [leapmotion/LeapJava "1.0.9.8391"]
                  [org.clojure/clojure "1.6.0"]
                  [org.clojure/core.async "0.1.278.0-76b25b-alpha"]
                  [org.clojure/math.numeric-tower "0.0.4"]
