@@ -73,7 +73,7 @@
   (p/with-matrix
       (p/translate (- (p/width) 500) 100)
 
-      (p/with-matrix
+      #_(p/with-matrix
         (when-let [img (i/get-selected-image)]
           (let [{:keys [offset scale]} (i/scale-image-instructions (.width img) (.height img) s/pov-width s/pov-height)]
             (p/scale scale)
@@ -119,8 +119,11 @@
                           :parse-fn #(Integer/parseInt %)]
                          ["-m" "--mirror" "Mirror console display"]])]
     (if host
-      (s/set-pov-addr! {:host host
-                        :port port}))
+      (do
+        (println "Connecting to Rendersphere at" (str host ":" port))
+        (s/set-pov-addr! {:host host
+                            :port port}))
+      (println "Rendersphere connection not configured"))
     (if mirror (s/set-state! :console-mirror mirror))
 
     (ddr/init-ddr))
