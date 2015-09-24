@@ -1,7 +1,7 @@
-(ns makerbar.pov.console.controller.keyboard
+(ns makerbar.pov.controller.keyboard
     (:import [java.awt.event KeyEvent])
-    (:require [makerbar.pov.console.images :as i]
-              [makerbar.pov.console.state :as s]))
+    (:require [makerbar.pov.images :as i]
+              [makerbar.pov.state :as s]))
 
 (defn key-pressed [^KeyEvent event]
   (let [factor (if (.isShiftDown event) 1 10)]

@@ -1,4 +1,4 @@
-(ns makerbar.pov.console.processing
+(ns makerbar.pov.processing
   (:import [processing.core PApplet PGraphics]))
 
 

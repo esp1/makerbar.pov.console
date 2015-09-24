@@ -1,10 +1,10 @@
-(ns makerbar.pov.console.net
+(ns makerbar.pov.net
   (:require [aleph.tcp :as tcp :refer (tcp-client)]
             [byte-streams :as b]
             [gloss.core :as g :refer (defcodec header)]
             [gloss.io :as io :refer (decode encode)]
             [lamina.core :as l]
-            [makerbar.pov.console.state :as s]))
+            [makerbar.pov.state :as s]))
 
 (defn get-ch [addr]
   (l/wait-for-result (tcp-client addr)))

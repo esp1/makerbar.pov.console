@@ -1,6 +1,6 @@
-(ns makerbar.pov.console.game
+(ns makerbar.pov.game
   (:require [clojure.core.async :as async :refer (go-loop)]
-            [makerbar.pov.console.state :as s]))
+            [makerbar.pov.state :as s]))
 
 
 (defn jaeger

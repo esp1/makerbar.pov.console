@@ -1,4 +1,4 @@
-(ns makerbar.pov.console.state)
+(ns makerbar.pov.state)
 
 
 ; Constants

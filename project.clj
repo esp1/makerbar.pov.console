@@ -20,5 +20,5 @@
   :jvm-opts ["-Djava.library.path=lib/leapmotion-1.0.9.8391"
              "-Dgstreamer.library.path=lib/processing-2.1.1/video/macosx64"
              "-Dgstreamer.plugin.path=lib/processing-2.1.1/video/macosx64/plugins"]
-  :aot [makerbar.pov.console.ui]
-  :main makerbar.pov.console.ui)
+  :aot [makerbar.pov.ui]
+  :main makerbar.pov.ui)

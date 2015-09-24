@@ -1,5 +1,5 @@
-(ns makerbar.pov.console.controller.ddr
-  (:require [makerbar.pov.console.state :as s]
+(ns makerbar.pov.controller.ddr
+  (:require [makerbar.pov.state :as s]
             [serial.core :as serial]
             [clojure.core.async :as async]))
 

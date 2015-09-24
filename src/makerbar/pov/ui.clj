@@ -1,18 +1,18 @@
-(ns makerbar.pov.console.ui
+(ns makerbar.pov.ui
   (:gen-class
     :extends processing.core.PApplet
     :methods [[captureEvent [processing.video.Capture] void]
               [movieEvent [processing.video.Movie] void]])
   (:import [processing.core PApplet])
   (:require [clojure.tools.cli :as cli]
-            [makerbar.pov.console.controller.ddr :as ddr]
-            [makerbar.pov.console.controller.keyboard :as k]
-            [makerbar.pov.console.draw :as d]
-            [makerbar.pov.console.game :as game]
-            [makerbar.pov.console.images :as i]
-            [makerbar.pov.console.net :as n]
-            [makerbar.pov.console.processing :as p]
-            [makerbar.pov.console.state :as s]))
+            [makerbar.pov.controller.ddr :as ddr]
+            [makerbar.pov.controller.keyboard :as k]
+            [makerbar.pov.draw :as d]
+            [makerbar.pov.game :as game]
+            [makerbar.pov.images :as i]
+            [makerbar.pov.net :as n]
+            [makerbar.pov.processing :as p]
+            [makerbar.pov.state :as s]))
 
 
 (defn setup []
@@ -129,4 +129,4 @@
     (let [ch (ddr/init-ddr)]
       (game/init-game ch)))
 
-  (PApplet/main "makerbar.pov.console.ui"))
+  (PApplet/main "makerbar.pov.ui"))

@@ -1,9 +1,9 @@
-(ns makerbar.pov.console.draw
+(ns makerbar.pov.draw
   (:import [processing.core PImage])
   (:require [hiphip.int :as int]
-            [makerbar.pov.console.images :as i]
-            [makerbar.pov.console.processing :as p]
-            [makerbar.pov.console.state :as s]))
+            [makerbar.pov.images :as i]
+            [makerbar.pov.processing :as p]
+            [makerbar.pov.state :as s]))
 
 
 (def pov-graphics (atom nil))
