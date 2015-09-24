@@ -4,7 +4,7 @@
     :methods [[captureEvent [processing.video.Capture] void]
               [movieEvent [processing.video.Movie] void]])
   (:import [processing.core PApplet])
-  (:require [clojure.core.async :as async]
+  (:require [clojure.core.async :as async :refer (go-loop)]
             [clojure.tools.cli :as cli]
             [makerbar.pov.console.controller.ddr :as ddr]
             [makerbar.pov.console.controller.keyboard :as k]
@@ -40,8 +40,8 @@
 
     ; display frames per second
     (p/with-style
-        (p/stroke 255)
-        (p/text (str "Processing FPS: " (format "%.1f" fps)) 40 40))
+      (p/stroke 255)
+      (p/text (str "Processing FPS: " (format "%.1f" fps)) 40 40))
 
     ; rotate
     (s/inc-pov-offset [(* (s/get-state :rotation-speed) (s/get-state :rotation-direction)) 0]))
@@ -65,33 +65,33 @@
 
     ; draw frame
     (p/with-style
-        (p/stroke 200)
-        (p/no-fill)
-        (p/rect -1 -1 (+ s/pov-width 1) (+ s/pov-height 1))))
+      (p/stroke 200)
+      (p/no-fill)
+      (p/rect -1 -1 (+ s/pov-width 1) (+ s/pov-height 1))))
 
   ; image list
   (p/with-matrix
-      (p/translate (- (p/width) 500) 100)
+    (p/translate (- (p/width) 500) 100)
 
-      #_(p/with-matrix
+    #_(p/with-matrix
         (when-let [img (i/get-selected-image)]
           (let [{:keys [offset scale]} (i/scale-image-instructions (.width img) (.height img) s/pov-width s/pov-height)]
             (p/scale scale)
             (p/image img offset))))
 
-      (p/with-style
-        (p/stroke 255)
-        (p/text (i/display-image-list) 0 120)))
+    (p/with-style
+      (p/stroke 255)
+      (p/text (i/display-image-list) 0 120)))
 
   ; instructions
   (p/with-style
-      (p/stroke 255)
-      (p/text (k/display-keyboard-controls) 40 (- (p/height) 400)))
+    (p/stroke 255)
+    (p/text (k/display-keyboard-controls) 40 (- (p/height) 400)))
 
   ; status
   (p/with-style
-      (p/stroke 255)
-      (p/text (s/display-status) 400 (- (p/height) 400)))
+    (p/stroke 255)
+    (p/text (s/display-status) 400 (- (p/height) 400)))
 
   ; fade overlay
   (p/with-style
@@ -122,10 +122,20 @@
       (do
         (println "Connecting to Rendersphere at" (str host ":" port))
         (s/set-pov-addr! {:host host
-                            :port port}))
+                          :port port}))
       (println "Rendersphere connection not configured"))
     (if mirror (s/set-state! :console-mirror mirror))
 
-    (ddr/init-ddr))
+    (let [ch (ddr/init-ddr)]
+      (go-loop []
+        (when-let [{{:keys [north south east west north-west north-east]} :buttons
+                    :keys                           [controller-id]} (async/<! ch)]
+          (when north (s/inc-pov-offset [0 -1]))
+          (when south (s/inc-pov-offset [0 1]))
+          (when east (s/inc-pov-offset [1 0]))
+          (when west (s/inc-pov-offset [-1 0]))
+          (when north-west (s/inc-img-scale 1))
+          (when north-east (s/inc-img-scale -1))
+          (recur)))))
 
   (PApplet/main "makerbar.pov.console.ui"))

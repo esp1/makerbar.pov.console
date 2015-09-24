@@ -1,10 +1,10 @@
 /*
- * 8 Game pad buttons:
+ * 8 Game controller buttons:
  *    X      up    O
  *   left        right
  * triangle down square
  *
- * 9 states per pad:
+ * Each controller can be in one of 9 states:
  * psxLeft  0x0001
  * psxDown  0x0002
  * psxRight 0x0004
@@ -17,7 +17,7 @@
  *
  * nothing  0x0000
  *
- * protocol:
+ * Serial protocol:
  * frame start 0xAA (1 byte) | pad identifier A=0x01/B=0x02 (1 byte) | button value (2 bytes, mask=0x0F0F) | frame end 0xFF (1 byte)
  */
 #include <Psx.h>

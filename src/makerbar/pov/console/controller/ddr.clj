@@ -1,6 +1,7 @@
 (ns makerbar.pov.console.controller.ddr
   (:require [makerbar.pov.console.state :as s]
-            [serial.core :as serial]))
+            [serial.core :as serial]
+            [clojure.core.async :as async]))
 
 (def button-nw 0x0200)                                      ; x
 (def button-n 0x0008)                                       ; up
@@ -23,43 +24,41 @@
          (= data expected-value)
          data)))))
 
-;(defprotocol DDRHandler
-;  (north [this])
-;  (sourth [this])
-;  (east [this])
-;  (west [this])
-;  (north-east [this])
-;  (north-west [this])
-;  (south-east [this])
-;  (south-west [this]))
+(defn ddr-serial [ch #_core.async.channel]
+  (fn [in-stream]
+    (when (read-byte in-stream 0xAA)
+      (when-let [controller-id (read-byte in-stream)]
+        (when-let [buttons0 (read-byte in-stream)]
+          (when-let [buttons1 (read-byte in-stream)]
+            (let [buttons (+ (bit-shift-left buttons1 8) buttons0)]
+              (async/put! ch {:controller-id (condp = controller-id
+                                               1 :controller-A
+                                               2 :controller-B)
+                              :buttons       {:north      (not= 0 (bit-and buttons button-n))
+                                              :south      (not= 0 (bit-and buttons button-s))
+                                              :east       (not= 0 (bit-and buttons button-e))
+                                              :west       (not= 0 (bit-and buttons button-w))
+                                              :north-west (not= 0 (bit-and buttons button-nw))
+                                              :north-east (not= 0 (bit-and buttons button-ne))
+                                              :south-west (not= 0 (bit-and buttons button-sw))
+                                              :south-east (not= 0 (bit-and buttons button-se))}})
+              (read-byte in-stream 0xFF))))))))
 
-(defn ddr-serial [in-stream]
-  (when (read-byte in-stream 0xAA)
-    (when-let [pad-id (read-byte in-stream)]
-      (when-let [buttons0 (read-byte in-stream)]
-        (when-let [buttons1 (read-byte in-stream)]
-          (let [buttons (+ (bit-shift-left buttons1 8) buttons0)]
-            (prn "pad:" pad-id "buttons:" buttons "a:" buttons0 "b:" buttons1)
-            (when (not= 0 (bit-and buttons button-n)) (s/inc-pov-offset [0 -1]))
-            (when (not= 0 (bit-and buttons button-s)) (s/inc-pov-offset [0 1]))
-            (when (not= 0 (bit-and buttons button-e)) (s/inc-pov-offset [1 0]))
-            (when (not= 0 (bit-and buttons button-w)) (s/inc-pov-offset [-1 0]))
-            ;(when (bit-and buttons button-nw) (north ddr-handler))
-            ;(when (bit-and buttons button-ne) (north ddr-handler))
-            ;(when (bit-and buttons button-sw) (north ddr-handler))
-            ;(when (bit-and buttons button-se) (north ddr-handler))
-            (read-byte in-stream 0xFF)))))))
-
-(defn init-ddr []
+(defn init-ddr
+  "Connect to DDR controllers. Returns a core.async channel where controller events will be sent to."
+  []
   (if-let [port-id (first (filter #(.startsWith % "tty.usbserial-")
                                   (map #(.getName %)
                                        (serial/port-identifiers))))]
-    (let [port (serial/open port-id)]
+    (let [port (serial/open port-id)
+          ch (async/chan (async/sliding-buffer 10))]
       (println "Connected to DDR serial port" port-id)
-      (serial/listen! port ddr-serial)
+      (serial/listen! port (ddr-serial ch))
 
       (.addShutdownHook (Runtime/getRuntime)
                         (Thread. #(do
                                    (println "Closing DDR serial port" port-id)
-                                   (serial/close port)))))
+                                   (serial/close port)
+                                   (async/close! ch))))
+      ch)
     (println "DDR controllers not detected")))
