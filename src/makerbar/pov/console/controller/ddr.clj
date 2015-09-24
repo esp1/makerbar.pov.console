@@ -24,25 +24,30 @@
          (= data expected-value)
          data)))))
 
+(defn read-button-bytes [in-stream]
+  (when-let [cardinal-buttons (read-byte in-stream)]
+    (when-let [diagonal-buttons (read-byte in-stream)]
+      (+ (bit-shift-left diagonal-buttons 8)
+         cardinal-buttons))))
+
+(defn deserialize-button-value [button-bytes]
+  {:north      (not= 0 (bit-and button-bytes button-n))
+   :south      (not= 0 (bit-and button-bytes button-s))
+   :east       (not= 0 (bit-and button-bytes button-e))
+   :west       (not= 0 (bit-and button-bytes button-w))
+   :north-west (not= 0 (bit-and button-bytes button-nw))
+   :north-east (not= 0 (bit-and button-bytes button-ne))
+   :south-west (not= 0 (bit-and button-bytes button-sw))
+   :south-east (not= 0 (bit-and button-bytes button-se))})
+
 (defn ddr-serial [ch #_core.async.channel]
   (fn [in-stream]
     (when (read-byte in-stream 0xAA)
-      (when-let [controller-id (read-byte in-stream)]
-        (when-let [buttons0 (read-byte in-stream)]
-          (when-let [buttons1 (read-byte in-stream)]
-            (let [buttons (+ (bit-shift-left buttons1 8) buttons0)]
-              (async/put! ch {:controller-id (condp = controller-id
-                                               1 :controller-A
-                                               2 :controller-B)
-                              :buttons       {:north      (not= 0 (bit-and buttons button-n))
-                                              :south      (not= 0 (bit-and buttons button-s))
-                                              :east       (not= 0 (bit-and buttons button-e))
-                                              :west       (not= 0 (bit-and buttons button-w))
-                                              :north-west (not= 0 (bit-and buttons button-nw))
-                                              :north-east (not= 0 (bit-and buttons button-ne))
-                                              :south-west (not= 0 (bit-and buttons button-sw))
-                                              :south-east (not= 0 (bit-and buttons button-se))}})
-              (read-byte in-stream 0xFF))))))))
+      (when-let [a-button-bytes (read-button-bytes in-stream)]
+        (when-let [b-button-bytes (read-button-bytes in-stream)]
+          (async/put! ch {:ddr-a (deserialize-button-value a-button-bytes)
+                          :ddr-b (deserialize-button-value b-button-bytes)})
+          (read-byte in-stream 0xFF))))))
 
 (defn init-ddr
   "Connect to DDR controllers. Returns a core.async channel where controller events will be sent to."

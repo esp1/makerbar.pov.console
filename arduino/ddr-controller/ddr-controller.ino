@@ -18,7 +18,10 @@
  * nothing  0x0000
  *
  * Serial protocol:
- * frame start 0xAA (1 byte) | pad identifier A=0x01/B=0x02 (1 byte) | button value (2 bytes, mask=0x0F0F) | frame end 0xFF (1 byte)
+ *   1 byte = 0xAA - frame start
+ *   2 bytes, mask=0x0F0F - controller A button value
+ *   2 bytes, mask=0x0F0F - controller B button value
+ *   1 byte = 0xFF - frame end
  */
 #include <Psx.h>
 
@@ -36,27 +39,28 @@ void setup()
   Serial.begin(115200);
 }
 
-void update(byte pad, unsigned int data) {
-    Serial.write(0xAA);
-    Serial.write(pad);
+void writeButtonValue(unsigned int data) {
     Serial.write(data & 0x000F);
     Serial.write((data & 0x0F00) >> 8);
-    Serial.write(0xFF);
 
-//    Serial.print("AA");
-//    Serial.print("0");
-//    Serial.print(pad);
 //    Serial.print("0");
 //    Serial.print(data & 0x000F);
 //    Serial.print("0");
 //    Serial.print((data & 0x0F00) >> 8);
-//    Serial.println("FF");
 }
 
 void loop()
 {
-  update(PAD_A, psxA.read() & 0x0F0F);
-  update(PAD_B, psxB.read() & 0x0F0F);
+  Serial.write(0xAA);  // frame start
+
+//  Serial.print("A: ");
+  writeButtonValue(psxA.read() & 0x0F0F);
+
+//  Serial.print(", B: ");
+  writeButtonValue(psxB.read() & 0x0F0F);
+
+  Serial.write(0xFF);  // frame end
+//  Serial.println();
   
   delay(20);
 }

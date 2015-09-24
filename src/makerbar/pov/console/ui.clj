@@ -128,14 +128,13 @@
 
     (let [ch (ddr/init-ddr)]
       (go-loop []
-        (when-let [{{:keys [north south east west north-west north-east]} :buttons
-                    :keys                           [controller-id]} (async/<! ch)]
-          (when north (s/inc-pov-offset [0 -1]))
-          (when south (s/inc-pov-offset [0 1]))
-          (when east (s/inc-pov-offset [1 0]))
-          (when west (s/inc-pov-offset [-1 0]))
-          (when north-west (s/inc-img-scale 1))
-          (when north-east (s/inc-img-scale -1))
+        (when-let [{:keys [ddr-a ddr-b]} (async/<! ch)]
+          (when (and (:north ddr-a) (:north ddr-b)) (s/inc-pov-offset [0 -1]))
+          (when (and (:south ddr-a) (:south ddr-b)) (s/inc-pov-offset [0 1]))
+          (when (and (:east ddr-a) (:east ddr-b)) (s/inc-pov-offset [1 0]))
+          (when (and (:west ddr-a) (:west ddr-b)) (s/inc-pov-offset [-1 0]))
+          (when (and (:north-west ddr-a) (:north-west ddr-b)) (s/inc-img-scale 1))
+          (when (and (:north-east ddr-a) (:north-east ddr-b)) (s/inc-img-scale -1))
           (recur)))))
 
   (PApplet/main "makerbar.pov.console.ui"))
