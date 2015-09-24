@@ -1,4 +1,4 @@
-(ns makerbar.pov.images
+(ns makerbar.pov.ui.images
   (:import [gifAnimation Gif]
            [javax.swing JFileChooser JOptionPane]
            [javax.swing.filechooser FileNameExtensionFilter]
@@ -6,8 +6,8 @@
            [processing.video Capture Movie])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [makerbar.pov.processing :as p]
-            [makerbar.pov.state :as s]))
+            [makerbar.pov.state :as s]
+            [makerbar.pov.ui.processing :as p]))
 
 
 (defn image-file? [f]

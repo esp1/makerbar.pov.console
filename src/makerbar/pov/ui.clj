@@ -7,12 +7,12 @@
   (:require [clojure.tools.cli :as cli]
             [makerbar.pov.controller.ddr :as ddr]
             [makerbar.pov.controller.keyboard :as k]
-            [makerbar.pov.draw :as d]
             [makerbar.pov.game :as game]
-            [makerbar.pov.images :as i]
             [makerbar.pov.net :as n]
-            [makerbar.pov.processing :as p]
-            [makerbar.pov.state :as s]))
+            [makerbar.pov.state :as s]
+            [makerbar.pov.ui.draw :as d]
+            [makerbar.pov.ui.images :as i]
+            [makerbar.pov.ui.processing :as p]))
 
 
 (defn setup []
