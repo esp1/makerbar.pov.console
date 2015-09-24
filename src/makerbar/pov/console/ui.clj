@@ -4,11 +4,11 @@
     :methods [[captureEvent [processing.video.Capture] void]
               [movieEvent [processing.video.Movie] void]])
   (:import [processing.core PApplet])
-  (:require [clojure.core.async :as async :refer (go-loop)]
-            [clojure.tools.cli :as cli]
+  (:require [clojure.tools.cli :as cli]
             [makerbar.pov.console.controller.ddr :as ddr]
             [makerbar.pov.console.controller.keyboard :as k]
             [makerbar.pov.console.draw :as d]
+            [makerbar.pov.console.game :as game]
             [makerbar.pov.console.images :as i]
             [makerbar.pov.console.net :as n]
             [makerbar.pov.console.processing :as p]
@@ -127,14 +127,6 @@
     (if mirror (s/set-state! :console-mirror mirror))
 
     (let [ch (ddr/init-ddr)]
-      (go-loop []
-        (when-let [{:keys [ddr-a ddr-b]} (async/<! ch)]
-          (when (and (:north ddr-a) (:north ddr-b)) (s/inc-pov-offset [0 -1]))
-          (when (and (:south ddr-a) (:south ddr-b)) (s/inc-pov-offset [0 1]))
-          (when (and (:east ddr-a) (:east ddr-b)) (s/inc-pov-offset [1 0]))
-          (when (and (:west ddr-a) (:west ddr-b)) (s/inc-pov-offset [-1 0]))
-          (when (and (:north-west ddr-a) (:north-west ddr-b)) (s/inc-img-scale 1))
-          (when (and (:north-east ddr-a) (:north-east ddr-b)) (s/inc-img-scale -1))
-          (recur)))))
+      (game/init-game ch)))
 
   (PApplet/main "makerbar.pov.console.ui"))
