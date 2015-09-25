@@ -15,12 +15,13 @@
                     (map #(get ddr-b %) buttons)))))
 
 (defn init-game [ddr-ch]
-  (go-loop []
-    (when-let [evt (async/<! ddr-ch)]
-      (when (jaeger evt :north) (s/inc-pov-offset [0 -1]))
-      (when (jaeger evt :south) (s/inc-pov-offset [0 1]))
-      (when (jaeger evt :east) (s/inc-pov-offset [1 0]))
-      (when (jaeger evt :west) (s/inc-pov-offset [-1 0]))
-      (when (jaeger evt :north-west) (s/inc-img-scale 1))
-      (when (jaeger evt :north-eats) (s/inc-img-scale -1))
-      (recur))))
+  (when ddr-ch
+    (go-loop []
+      (when-let [evt (async/<! ddr-ch)]
+        (when (jaeger evt :north) (s/inc-pov-offset [0 -1]))
+        (when (jaeger evt :south) (s/inc-pov-offset [0 1]))
+        (when (jaeger evt :east) (s/inc-pov-offset [1 0]))
+        (when (jaeger evt :west) (s/inc-pov-offset [-1 0]))
+        (when (jaeger evt :north-west) (s/inc-img-scale 1))
+        (when (jaeger evt :north-eats) (s/inc-img-scale -1))
+        (recur)))))
