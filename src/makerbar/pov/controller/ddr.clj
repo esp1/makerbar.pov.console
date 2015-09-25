@@ -49,7 +49,7 @@
                           :ddr-b (deserialize-button-value b-button-bytes)})
           (read-byte in-stream 0xFF))))))
 
-(defn init-ddr
+(defn connect
   "Connect to DDR controllers. Returns a core.async channel where controller events will be sent to."
   []
   (if-let [port-id (first (filter #(.startsWith % "tty.usbserial-")

@@ -1,9 +1,8 @@
 (ns makerbar.pov.console
   (:require [makerbar.pov.controller.keyboard :as k]
-            [makerbar.pov.net :as n]
             [makerbar.pov.state :as s]
             [makerbar.pov.ui.draw :as d]
-            [makerbar.pov.ui.images :as i]
+            [makerbar.pov.ui.images :as img]
             [makerbar.pov.ui.processing :as p]))
 
 (def time-t (atom (System/currentTimeMillis)))
@@ -32,42 +31,32 @@
     ; rotate
     (s/inc-pov-offset [(* (s/get-state :rotation-speed) (s/get-state :rotation-direction)) 0]))
 
-  (p/with-matrix
-    ;    (p/translate 40 80)
-    ;    (p/scale 3)
+  (when-let [img (s/get-state :image)]
+    (when (and (< 0 (.width img)) (< 0 (.height img)))
+      (p/with-matrix
+        ;    (p/translate 40 80)
+        ;    (p/scale 3)
 
-    (let [{:keys [offset scale]} (i/scale-image-instructions s/pov-width s/pov-height (* 0.9 (p/width)) (* 0.9 (p/height)))]
-      (p/translate (* 0.05 (p/width)) (* 0.05 (p/height)))
-      (p/translate offset)
-      (p/scale scale))
-
-    ; draw image
-    (d/draw-image)
-
-    ; send image data to POV display
-    (if-let [pov-addr @s/pov-addr]
-      (if-let [data (.pixels @d/pov-graphics)]
-        (n/pov-send-data pov-addr data)))
-
-    ; draw frame
-    (p/with-style
-      (p/stroke 200)
-      (p/no-fill)
-      (p/rect -1 -1 (+ s/pov-width 1) (+ s/pov-height 1))))
+        ; draw scaled image to pov-graphics
+        (d/pov-view
+          #(let [{:keys [offset scale]} (img/scale-image-instructions)]
+            (p/background 0)
+            (p/scale scale)
+            (p/image img offset))))))
 
   ; image list
   (p/with-matrix
     (p/translate (- (p/width) 500) 100)
 
     #_(p/with-matrix
-        (when-let [img (i/get-selected-image)]
-          (let [{:keys [offset scale]} (i/scale-image-instructions (.width img) (.height img) s/pov-width s/pov-height)]
+        (when-let [img (img/get-selected-image)]
+          (let [{:keys [offset scale]} (img/scale-image-instructions (.width img) (.height img) s/pov-width s/pov-height)]
             (p/scale scale)
             (p/image img offset))))
 
     (p/with-style
       (p/stroke 255)
-      (p/text (i/display-image-list) 0 120)))
+      (p/text (img/display-image-list) 0 120)))
 
   ; instructions
   (p/with-style

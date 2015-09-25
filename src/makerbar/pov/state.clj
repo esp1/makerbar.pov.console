@@ -29,14 +29,10 @@
 
 ; State
 
-(def pov-addr (atom nil))
 (def state (atom initial-state))
 
 
 ; Functions
-
-(defn get-pov-addr [] @pov-addr)
-(defn set-pov-addr! [addr] (reset! pov-addr addr))
 
 (defn get-state
   ([] @state)

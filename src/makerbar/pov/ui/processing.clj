@@ -79,7 +79,9 @@
      (.endDraw (current-graphics))))
 
 (defn fill
-  ([gray alpha] (.fill (current-graphics) gray gray gray alpha)))
+  ([r g b] (fill r g b 1))
+  ([r g b a] (.fill (current-graphics) r g b (or a 1)))
+  ([gray a] (fill gray gray gray a)))
 
 (defn image
   ([img [x y]] (image img x y))
@@ -95,7 +97,10 @@
   ([sx sy] (.scale (current-graphics) sx sy)))
 
 (defn stroke
-  ([gray] (.stroke (current-graphics) gray)))
+  ([r g b] (stroke r g b 1))
+  ([r g b a] (.stroke (current-graphics) r g b a))
+  ([gray] (stroke gray 1))
+  ([gray a] (.stroke (current-graphics) gray)))
 
 (defn text
   ([string width height] (.text (current-graphics) string (float width) (float height))))

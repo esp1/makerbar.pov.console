@@ -1,7 +1,9 @@
 (ns makerbar.pov.game
   (:require [clojure.core.async :as async :refer (go-loop)]
-            [makerbar.pov.state :as s]))
+            [makerbar.pov.state :as s]
+            [makerbar.pov.ui.processing :as p]))
 
+(def game-state (atom {}))
 
 (defn jaeger
   "Returns true only if all target buttons are pressed on all ddr controllers.
@@ -25,3 +27,17 @@
         (when (jaeger evt :north-west) (s/inc-img-scale 1))
         (when (jaeger evt :north-eats) (s/inc-img-scale -1))
         (recur)))))
+
+(defn rand-pattern [num-players]
+  (distinct
+    (for [i (range (* num-players 2))]
+      (rand-int 8))))
+
+(defmulti game :stage)
+(defmethod game :init [_])
+
+(defn draw []
+  ; clear
+  (p/background 0)
+
+  )
