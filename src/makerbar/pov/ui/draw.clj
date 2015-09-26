@@ -1,6 +1,5 @@
 (ns makerbar.pov.ui.draw
-  (:require [clojure.core.async :as async]
-            [hiphip.int :as int]
+  (:require [hiphip.int :as int]
             [makerbar.pov.rendersphere :as rendersphere]
             [makerbar.pov.state :as s]
             [makerbar.pov.ui.images :as img]
