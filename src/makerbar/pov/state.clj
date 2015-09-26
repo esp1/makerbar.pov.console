@@ -60,6 +60,8 @@
          (fn [[x y]]
            [(wrapped (+ x dx) pov-width) (wrapped (+ y dy) pov-height)])))
 
+(defn reset-pov-offset [] (swap! state assoc-in [:pov-offset] [0 0]))
+
 (defn inc-img-scale [ds] (swap! state update-in [:img-scale] #(+ % (* 0.01 ds))))
 
 (defn inc-img-offset [offset] (swap! state update-in [:img-offset] #(map + % offset)))

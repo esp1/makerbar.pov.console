@@ -1,9 +1,12 @@
 (ns makerbar.pov.mode)
 
-(def mode (atom nil))
+(def modes (atom {}))
 
-(defn set-mode! [m]
-  (reset! mode m))
+(defn add-mode [kw m]
+  (println "Adding mode" kw)
+  (swap! modes conj [kw m]))
+
+(def mode (atom nil))
 
 (defprotocol UiMode
   (init [_])
@@ -11,3 +14,9 @@
   (key-pressed [_ event])
   (key-released [_ event])
   (ddr-button-pressed [_ event]))
+
+(defn ->mode [kw]
+  (println "Switching to mode" kw)
+  (let [m (get @modes kw)]
+    (init m)
+    (reset! mode m)))

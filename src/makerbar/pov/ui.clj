@@ -21,7 +21,11 @@
 
   (d/init)
 
-  (m/set-mode! (game/mode))
+  (m/add-mode :game (game/mode))
+  (m/add-mode :console (console/mode))
+
+  (m/->mode :console)
+
   (m/init @m/mode))
 
 (defn -setup [this] (p/with-applet this (setup)))

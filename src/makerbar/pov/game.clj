@@ -152,7 +152,7 @@
     (key-pressed [_ event]
       (condp = (.getKeyCode event)
 
-        KeyEvent/VK_ESCAPE (mode/set-mode! (console/mode))
+        KeyEvent/VK_ESCAPE (mode/->mode :console)
 
         KeyEvent/VK_EQUALS (swap! game-state update-in [:score]
                                 #(if (< % score-range)
@@ -217,7 +217,9 @@
 (defn mode []
   (reify UiMode
 
-    (init [_] (stage/set-stage! initial-stage))
+    (init [_]
+      (s/reset-pov-offset)
+      (stage/set-stage! initial-stage))
 
     (draw [_]
       ; clear

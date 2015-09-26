@@ -7,8 +7,7 @@
             [makerbar.pov.ui.draw :as d]
             [makerbar.pov.ui.images :as img]
             [makerbar.pov.ui.processing :as p]
-            [makerbar.pov.mode :as mode]
-            [makerbar.pov.game :as game]))
+            [makerbar.pov.mode :as mode]))
 
 (def time-t (atom (System/currentTimeMillis)))
 
@@ -100,7 +99,7 @@
         (p/fill 0 (s/get-state :console-fade))
         (p/rect 0 0 (p/width) (p/height))))
 
-    (key-pressed [event]
+    (key-pressed [_ event]
       (let [factor (if (.isShiftDown event) 1 10)]
         (condp = (.getKeyCode event)
 
@@ -146,7 +145,7 @@
 
           KeyEvent/VK_ESCAPE (s/reset-settings)
 
-          KeyEvent/VK_G (mode/set-mode! (game/mode))
+          KeyEvent/VK_G (mode/->mode :game)
 
           nil)))
     (key-released [_ event])
