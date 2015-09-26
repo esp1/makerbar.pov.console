@@ -6,6 +6,7 @@
   (reset! mode m))
 
 (defprotocol UiMode
+  (init [_])
   (draw [_])
   (key-pressed [_ event])
   (ddr-button-pressed [_ event]))

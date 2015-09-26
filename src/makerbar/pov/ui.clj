@@ -18,8 +18,11 @@
 (defn setup []
   (p/size (p/display-width) (p/display-height))
   ; (q/frame-rate 30)
-  (m/set-mode! console/mode)
-  (d/init))
+
+  (d/init)
+
+  (m/set-mode! (game/mode))
+  (m/init @m/mode))
 
 (defn -setup [this] (p/with-applet this (setup)))
 ;(defn -sketchFullScreen [this] true)

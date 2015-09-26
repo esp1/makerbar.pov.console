@@ -103,7 +103,7 @@
   ([gray a] (.stroke (current-graphics) gray)))
 
 (defn text
-  ([string width height] (.text (current-graphics) string (float width) (float height))))
+  ([string x y] (.text (current-graphics) string (float x) (float y))))
 
 (defn text-descent [] (.textDescent (current-graphics)))
 

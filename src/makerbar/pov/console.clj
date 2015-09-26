@@ -10,7 +10,7 @@
 
 ;; Mode
 
-(def mode
+(defn mode []
   (reify UiMode
 
     (draw [_]
