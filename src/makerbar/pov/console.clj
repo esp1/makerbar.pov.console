@@ -1,10 +1,14 @@
 (ns makerbar.pov.console
+  (:import [java.awt.event KeyEvent])
   (:require [makerbar.pov.console.keys :as k]
+            [makerbar.pov.controller.ddr :as ddr]
             [makerbar.pov.mode :refer (UiMode)]
             [makerbar.pov.state :as s]
             [makerbar.pov.ui.draw :as d]
             [makerbar.pov.ui.images :as img]
-            [makerbar.pov.ui.processing :as p]))
+            [makerbar.pov.ui.processing :as p]
+            [makerbar.pov.mode :as mode]
+            [makerbar.pov.game :as game]))
 
 (def time-t (atom (System/currentTimeMillis)))
 
@@ -69,7 +73,22 @@
       ; instructions
       (p/with-style
         (p/stroke 255)
-        (p/text (k/keyboard-controls) 40 (- (p/height) 400)))
+        (p/text "o : open image file
+                 c : capture video
+
+                 z/x : select image
+                 space : display selected image
+
+                 -/+ : scale image decrease/increase
+                 H/K/U/J : image offset left/right/up/down
+                 arrow keys : globe offset
+                 A/D : contrast decrease/increase
+                 S/W : brightness decrease/increase
+                 (hold shift for fine scale/offset)
+                 0-9 : rotation speed
+                 R : change rotation direction
+                 F : flip image"
+                40 (- (p/height) 400)))
 
       ; status
       (p/with-style
@@ -81,5 +100,65 @@
         (p/fill 0 (s/get-state :console-fade))
         (p/rect 0 0 (p/width) (p/height))))
 
-    (key-pressed [_ event] (k/key-pressed event))
-    (key-released [_ event])))
+    (key-pressed [event]
+      (let [factor (if (.isShiftDown event) 1 10)]
+        (condp = (.getKeyCode event)
+
+          KeyEvent/VK_O (img/display-image (img/get-image))
+          KeyEvent/VK_Z (img/inc-image-selection -1)
+          KeyEvent/VK_X (img/inc-image-selection 1)
+          KeyEvent/VK_SPACE (img/display-image (img/get-selected-image))
+
+          KeyEvent/VK_C (img/capture-video)
+
+          KeyEvent/VK_LEFT (s/inc-pov-offset [(- factor) 0])
+          KeyEvent/VK_RIGHT (s/inc-pov-offset [factor 0])
+          KeyEvent/VK_UP (s/inc-pov-offset [0 (- factor)])
+          KeyEvent/VK_DOWN (s/inc-pov-offset [0 factor])
+
+          KeyEvent/VK_EQUALS (s/inc-img-scale factor)
+          KeyEvent/VK_MINUS (s/inc-img-scale (- factor))
+
+          KeyEvent/VK_H (s/inc-img-offset [(- factor) 0])
+          KeyEvent/VK_K (s/inc-img-offset [factor 0])
+          KeyEvent/VK_U (s/inc-img-offset [0 (- factor)])
+          KeyEvent/VK_J (s/inc-img-offset [0 factor])
+
+          KeyEvent/VK_0 (s/rotation-speed 0)
+          KeyEvent/VK_1 (s/rotation-speed 1)
+          KeyEvent/VK_2 (s/rotation-speed 2)
+          KeyEvent/VK_3 (s/rotation-speed 3)
+          KeyEvent/VK_4 (s/rotation-speed 4)
+          KeyEvent/VK_5 (s/rotation-speed 5)
+          KeyEvent/VK_6 (s/rotation-speed 6)
+          KeyEvent/VK_7 (s/rotation-speed 7)
+          KeyEvent/VK_8 (s/rotation-speed 8)
+          KeyEvent/VK_9 (s/rotation-speed 9)
+          KeyEvent/VK_R (s/toggle-rotation-direction)
+
+          KeyEvent/VK_F (s/toggle-flip-image)
+
+          KeyEvent/VK_S (s/inc-brightness (- factor))
+          KeyEvent/VK_W (s/inc-brightness factor)
+
+          KeyEvent/VK_A (s/inc-contrast (- factor))
+          KeyEvent/VK_D (s/inc-contrast factor)
+
+          KeyEvent/VK_ESCAPE (s/reset-settings)
+
+          KeyEvent/VK_G (mode/set-mode! (game/mode))
+
+          nil)))
+    (key-released [_ event])
+
+    (ddr-button-pressed [_ evt]
+      (when (ddr/jaeger evt :north) (s/inc-pov-offset [0 -1]))
+      (when (ddr/jaeger evt :south) (s/inc-pov-offset [0 1]))
+      (when (ddr/jaeger evt :east) (s/inc-pov-offset [1 0]))
+      (when (ddr/jaeger evt :west) (s/inc-pov-offset [-1 0]))
+
+      (when (ddr/jaeger evt :north-west) (s/inc-img-scale 1))
+      (when (ddr/jaeger evt :north-east) (s/inc-img-scale -1))
+
+      (when (ddr/jaeger evt :south-west) (img/inc-image-selection -1))
+      (when (ddr/jaeger evt :south-east) (img/inc-image-selection 1)))))

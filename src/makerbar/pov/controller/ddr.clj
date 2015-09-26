@@ -64,3 +64,14 @@
                                    (async/close! ch))))
       ch)
     (println "DDR controllers not detected")))
+
+(defn jaeger
+  "Returns true only if all target buttons are pressed on all ddr controllers.
+  See: Pacific Rim movie."
+  [{:keys [ddr-a ddr-b]} button-or-buttons]
+  (let [buttons (if (seq? button-or-buttons)
+                  button-or-buttons
+                  [button-or-buttons])]
+    (reduce #(and %1 %2)
+            (concat (map #(get ddr-a %) buttons)
+                    (map #(get ddr-b %) buttons)))))

@@ -4,18 +4,8 @@
             [makerbar.pov.mode :as mode :refer (UiMode)]
             [makerbar.pov.state :as s]
             [makerbar.pov.ui.processing :as p]
-            [makerbar.pov.ui.draw :as d]))
-
-(defn jaeger
-  "Returns true only if all target buttons are pressed on all ddr controllers.
-  See: Pacific Rim movie."
-  [{:keys [ddr-a ddr-b]} button-or-buttons]
-  (let [buttons (if (seq? button-or-buttons)
-                  button-or-buttons
-                  [button-or-buttons])]
-    (reduce #(and %1 %2)
-            (concat (map #(get ddr-a %) buttons)
-                    (map #(get ddr-b %) buttons)))))
+            [makerbar.pov.ui.draw :as d]
+            [makerbar.pov.console :as console]))
 
 (def button-coords
   {:north-west [-1 -1]
@@ -157,16 +147,12 @@
             (p/no-fill)
             (draw-button-glyphs pattern draw-arrow)))))
 
-    (ddr-button-pressed [_ evt]
-      (when (jaeger evt :north) (s/inc-pov-offset [0 -1]))
-      (when (jaeger evt :south) (s/inc-pov-offset [0 1]))
-      (when (jaeger evt :east) (s/inc-pov-offset [1 0]))
-      (when (jaeger evt :west) (s/inc-pov-offset [-1 0]))
-      (when (jaeger evt :north-west) (s/inc-img-scale 1))
-      (when (jaeger evt :north-eats) (s/inc-img-scale -1)))
+    (ddr-button-pressed [_ evt])
 
     (key-pressed [_ event]
       (condp = (.getKeyCode event)
+
+        KeyEvent/VK_ESCAPE (mode/set-mode! (console/mode))
 
         KeyEvent/VK_EQUALS (swap! game-state update-in [:score]
                                 #(if (< % score-range)
