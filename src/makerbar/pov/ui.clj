@@ -17,7 +17,7 @@
 
 (defn setup []
   (p/size (p/display-width) (p/display-height))
-  (p/frame-rate 30)
+  (p/frame-rate 16)
 
   (d/init)
 
