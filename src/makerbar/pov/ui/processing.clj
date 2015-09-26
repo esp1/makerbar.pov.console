@@ -89,6 +89,7 @@
 (defn fill
   ([r g b] (fill r g b 255))
   ([r g b a] (.fill (current-graphics) r g b (or a 255)))
+  ([gray] (fill gray gray gray 255))
   ([gray a] (fill gray gray gray a)))
 
 (defn image

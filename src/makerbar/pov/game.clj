@@ -77,43 +77,65 @@
 
 ;; Stages
 
+(def score-range 10)
 (def game-state (atom nil))
 
 (def initial-stage
   (reify UiMode
 
     (init [_]
-      (reset! game-state {:ddr-a   {:feets 2
-                                    :score 5}
-                          :ddr-b   {:feets 2
-                                    :score 5}
+      (reset! game-state {:score   (/ score-range 2)
+                          :team-a   {}
+                          :team-b   {}
                           :pattern (rand-pattern 2)}))
 
     (draw [_]
       ; clear
       (p/background 0)
 
+      ; draw score
+      (let [pct (/ (:score @game-state) score-range)
+            a-height (* pct 102)
+            b-height (- 102 a-height)]
+        ; team A score
+        (p/with-style
+          (p/stroke 0 0 255 128)
+          (p/fill 0 0 255 128)
+          (p/rect 0 0 224 a-height))
+        ; team B score
+        (p/with-style
+          (p/stroke 255 0 0 128)
+          (p/fill 255 0 0 128)
+          (p/rect 0 a-height 224 b-height)))
+
+      ; draw button patterns
       (p/with-matrix
         (p/translate [(/ 224 2) (/ 102 2)])
 
+        ; draw button border
+        (p/with-matrix
+          (p/stroke 255)
+          (p/fill 0)
+          (draw-button-border))
+
         (let [pattern (get-in @game-state [:pattern])
-              a-buttons (->> (get-in @game-state [:ddr-a :buttons])
+              a-buttons (->> (get-in @game-state [:team-a :buttons])
                              (filter second)
                              (map first))
-              b-buttons (->> (get-in @game-state [:ddr-b :buttons])
+              b-buttons (->> (get-in @game-state [:team-b :buttons])
                              (filter second)
                              (map first))]
-          ; draw ddr A buttons
+          ; draw team A buttons
           (p/with-style
-            (p/fill 0 0 255 128)
+            (p/fill 0 0 255)
             (draw-button-glyphs a-buttons (fn [b]
                                             (if (some #{b} pattern)
                                               (draw-arrow b)
                                               (draw-x)))))
 
-          ; draw ddr B buttons
+          ; draw team B buttons
           (p/with-style
-            (p/fill 255 0 0 128)
+            (p/fill 255 0 0)
             (draw-button-glyphs b-buttons (fn [b]
                                             (if (some #{b} pattern)
                                               (draw-arrow b)
@@ -123,8 +145,7 @@
           (p/with-style
             (p/stroke 255)
             (p/no-fill)
-            (draw-button-glyphs pattern draw-arrow)
-            (draw-button-border)))))
+            (draw-button-glyphs pattern draw-arrow)))))
 
     (ddr-button-pressed [_ evt]
       (when (jaeger evt :north) (s/inc-pov-offset [0 -1]))
@@ -137,52 +158,62 @@
     (key-pressed [_ event]
       (condp = (.getKeyCode event)
 
-        ;; DDR A
-        KeyEvent/VK_Q (swap! game-state assoc-in [:ddr-a :buttons :north-west] true)
-        KeyEvent/VK_W (swap! game-state assoc-in [:ddr-a :buttons :north] true)
-        KeyEvent/VK_E (swap! game-state assoc-in [:ddr-a :buttons :north-east] true)
-        KeyEvent/VK_A (swap! game-state assoc-in [:ddr-a :buttons :west] true)
-        KeyEvent/VK_D (swap! game-state assoc-in [:ddr-a :buttons :east] true)
-        KeyEvent/VK_Z (swap! game-state assoc-in [:ddr-a :buttons :south-west] true)
-        KeyEvent/VK_X (swap! game-state assoc-in [:ddr-a :buttons :south] true)
-        KeyEvent/VK_C (swap! game-state assoc-in [:ddr-a :buttons :south-east] true)
+        KeyEvent/VK_EQUALS (swap! game-state update-in [:score]
+                                #(if (< % score-range)
+                                  (inc %)
+                                  %))
+        KeyEvent/VK_MINUS (swap! game-state update-in [:score]
+                                 #(if (> % 0)
+                                   (dec %)
+                                   %))
 
-        ; DDR B
-        KeyEvent/VK_I (swap! game-state assoc-in [:ddr-b :buttons :north-west] true)
-        KeyEvent/VK_O (swap! game-state assoc-in [:ddr-b :buttons :north] true)
-        KeyEvent/VK_P (swap! game-state assoc-in [:ddr-b :buttons :north-east] true)
-        KeyEvent/VK_K (swap! game-state assoc-in [:ddr-b :buttons :west] true)
-        KeyEvent/VK_SEMICOLON (swap! game-state assoc-in [:ddr-b :buttons :east] true)
-        KeyEvent/VK_COMMA (swap! game-state assoc-in [:ddr-b :buttons :south-west] true)
-        KeyEvent/VK_PERIOD (swap! game-state assoc-in [:ddr-b :buttons :south] true)
-        KeyEvent/VK_SLASH (swap! game-state assoc-in [:ddr-b :buttons :south-east] true)
+        ;; team A
+        KeyEvent/VK_Q (swap! game-state assoc-in [:team-a :buttons :north-west] true)
+        KeyEvent/VK_W (swap! game-state assoc-in [:team-a :buttons :north] true)
+        KeyEvent/VK_E (swap! game-state assoc-in [:team-a :buttons :north-east] true)
+        KeyEvent/VK_A (swap! game-state assoc-in [:team-a :buttons :west] true)
+        KeyEvent/VK_D (swap! game-state assoc-in [:team-a :buttons :east] true)
+        KeyEvent/VK_Z (swap! game-state assoc-in [:team-a :buttons :south-west] true)
+        KeyEvent/VK_X (swap! game-state assoc-in [:team-a :buttons :south] true)
+        KeyEvent/VK_C (swap! game-state assoc-in [:team-a :buttons :south-east] true)
+
+        ; team B
+        KeyEvent/VK_I (swap! game-state assoc-in [:team-b :buttons :north-west] true)
+        KeyEvent/VK_O (swap! game-state assoc-in [:team-b :buttons :north] true)
+        KeyEvent/VK_P (swap! game-state assoc-in [:team-b :buttons :north-east] true)
+        KeyEvent/VK_K (swap! game-state assoc-in [:team-b :buttons :west] true)
+        KeyEvent/VK_SEMICOLON (swap! game-state assoc-in [:team-b :buttons :east] true)
+        KeyEvent/VK_COMMA (swap! game-state assoc-in [:team-b :buttons :south-west] true)
+        KeyEvent/VK_PERIOD (swap! game-state assoc-in [:team-b :buttons :south] true)
+        KeyEvent/VK_SLASH (swap! game-state assoc-in [:team-b :buttons :south-east] true)
 
         KeyEvent/VK_SPACE (swap! game-state assoc-in [:target-pattern] (rand-pattern 2))
 
-        nil))
+        nil)
+      (prn @game-state))
 
     (key-released [_ event]
       (condp = (.getKeyCode event)
 
-        ;; DDR A
-        KeyEvent/VK_Q (swap! game-state assoc-in [:ddr-a :buttons :north-west] false)
-        KeyEvent/VK_W (swap! game-state assoc-in [:ddr-a :buttons :north] false)
-        KeyEvent/VK_E (swap! game-state assoc-in [:ddr-a :buttons :north-east] false)
-        KeyEvent/VK_A (swap! game-state assoc-in [:ddr-a :buttons :west] false)
-        KeyEvent/VK_D (swap! game-state assoc-in [:ddr-a :buttons :east] false)
-        KeyEvent/VK_Z (swap! game-state assoc-in [:ddr-a :buttons :south-west] false)
-        KeyEvent/VK_X (swap! game-state assoc-in [:ddr-a :buttons :south] false)
-        KeyEvent/VK_C (swap! game-state assoc-in [:ddr-a :buttons :south-east] false)
+        ;; team A
+        KeyEvent/VK_Q (swap! game-state assoc-in [:team-a :buttons :north-west] false)
+        KeyEvent/VK_W (swap! game-state assoc-in [:team-a :buttons :north] false)
+        KeyEvent/VK_E (swap! game-state assoc-in [:team-a :buttons :north-east] false)
+        KeyEvent/VK_A (swap! game-state assoc-in [:team-a :buttons :west] false)
+        KeyEvent/VK_D (swap! game-state assoc-in [:team-a :buttons :east] false)
+        KeyEvent/VK_Z (swap! game-state assoc-in [:team-a :buttons :south-west] false)
+        KeyEvent/VK_X (swap! game-state assoc-in [:team-a :buttons :south] false)
+        KeyEvent/VK_C (swap! game-state assoc-in [:team-a :buttons :south-east] false)
 
-        ; DDR B
-        KeyEvent/VK_I (swap! game-state assoc-in [:ddr-b :buttons :north-west] false)
-        KeyEvent/VK_O (swap! game-state assoc-in [:ddr-b :buttons :north] false)
-        KeyEvent/VK_P (swap! game-state assoc-in [:ddr-b :buttons :north-east] false)
-        KeyEvent/VK_K (swap! game-state assoc-in [:ddr-b :buttons :west] false)
-        KeyEvent/VK_SEMICOLON (swap! game-state assoc-in [:ddr-b :buttons :east] false)
-        KeyEvent/VK_COMMA (swap! game-state assoc-in [:ddr-b :buttons :south-west] false)
-        KeyEvent/VK_PERIOD (swap! game-state assoc-in [:ddr-b :buttons :south] false)
-        KeyEvent/VK_SLASH (swap! game-state assoc-in [:ddr-b :buttons :south-east] false)
+        ; team B
+        KeyEvent/VK_I (swap! game-state assoc-in [:team-b :buttons :north-west] false)
+        KeyEvent/VK_O (swap! game-state assoc-in [:team-b :buttons :north] false)
+        KeyEvent/VK_P (swap! game-state assoc-in [:team-b :buttons :north-east] false)
+        KeyEvent/VK_K (swap! game-state assoc-in [:team-b :buttons :west] false)
+        KeyEvent/VK_SEMICOLON (swap! game-state assoc-in [:team-b :buttons :east] false)
+        KeyEvent/VK_COMMA (swap! game-state assoc-in [:team-b :buttons :south-west] false)
+        KeyEvent/VK_PERIOD (swap! game-state assoc-in [:team-b :buttons :south] false)
+        KeyEvent/VK_SLASH (swap! game-state assoc-in [:team-b :buttons :south-east] false)
 
         nil))))
 
