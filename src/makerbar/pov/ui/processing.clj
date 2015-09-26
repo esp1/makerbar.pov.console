@@ -31,6 +31,7 @@
 (defn cursor
   ([c] (.cursor (current-applet) c)))
 
+(defn frame-rate [r] (.frameRate (current-applet) r))
 
 ; Graphics binding
 
