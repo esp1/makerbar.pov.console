@@ -17,27 +17,66 @@
             (concat (map #(get ddr-a %) buttons)
                     (map #(get ddr-b %) buttons)))))
 
-(defn rand-pattern [num-players]
-  (distinct
-    (for [i (range (* num-players 2))]
-      (rand-int 8))))
+(def button-coords
+  {:north-west [-1 -1]
+   :north      [0 -1]
+   :north-east [1 -1]
+
+   :west       [-1 0]
+   :east       [1 0]
+
+   :south-west [-1 1]
+   :south      [0 1]
+   :south-east [1 1]})
+
+(defn rand-pattern
+  "Returns a seq of random button ids. The length of the seq will at least 1 and at most num-buttons, but may be some number in between."
+  [num-buttons]
+  (let [button-ids (vec (keys button-coords))]
+    (distinct
+      (for [i (range num-buttons)]
+        (get button-ids (rand-int 8))))))
+
+(defn draw-pattern
+  "Draws the pattern of buttons on the current graphics context."
+  [pattern]
+  (let [r 10
+        delta 15]
+    (p/with-style
+      (p/fill 255 255 0)
+      (doseq [[dx dy] (map #(get button-coords %) pattern)]
+        (p/ellipse (* dx delta) (* dy delta) r r)))
+    (p/with-style
+      (p/stroke 255)
+      (p/no-fill)
+      (let [s (+ delta)]
+        (p/rect (- s) (- s) (* 2 s) (* 2 s))))))
 
 ;; Stages
 
-(def game-state (atom {:count 0}))
+(def game-state (atom nil))
 
 (def initial-stage
   (reify UiMode
 
-    (init [_])
+    (init [_]
+      (reset! game-state {:ddr-a          {:feets 2
+                                           :score 0}
+                          :ddr-b          {:feets 2
+                                           :score 0}
+                          :target-pattern (rand-pattern 2)})
+      (prn @game-state))
 
     (draw [_]
       ; clear
       (p/background 0)
 
       (p/with-style
-        (p/stroke 0 255 255)
-        (p/text (str "Revolution " (:count @game-state)) 0 20)))
+        (p/stroke 255 0 0)
+        (p/text (pr-str (:target-pattern @game-state)) 0 20))
+      (p/with-matrix
+        (p/translate [(/ 224 2) (/ 102 2)])
+        (draw-pattern (:target-pattern @game-state))))
 
     (ddr-button-pressed [_ evt]
       (when (jaeger evt :north) (s/inc-pov-offset [0 -1]))
@@ -50,11 +89,28 @@
     (key-pressed [_ event]
       (condp = (.getKeyCode event)
 
-        KeyEvent/VK_UP (swap! game-state update-in [:count] inc)
-        KeyEvent/VK_DOWN (swap! game-state update-in [:count] dec)
+        ;; DDR A
+        ;KeyEvent/VK_Q #_north-west
+        ;KeyEvent/VK_W #_north
+        ;KeyEvent/VK_E #_north-east
+        ;KeyEvent/VK_A #_west
+        ;KeyEvent/VK_D #_east
+        ;KeyEvent/VK_Z #_south-west
+        ;KeyEvent/VK_X #_south
+        ;KeyEvent/VK_C #_south-east
+        ;
+        ;; DDR B
+        ;KeyEvent/VK_I #_north-west
+        ;KeyEvent/VK_O #_north
+        ;KeyEvent/VK_P #_north-east
+        ;KeyEvent/VK_K #_west
+        ;KeyEvent/VK_SEMICOLON #_east
+        ;KeyEvent/VK_COMMA #_south-west
+        ;KeyEvent/VK_PERIOD #_south
+        ;KeyEvent/VK_SLASH #_south-east
+        KeyEvent/VK_SPACE (swap! game-state assoc-in [:target-pattern] (rand-pattern 2))
 
-        nil)
-      (prn @game-state event))))
+        nil))))
 
 ;; Mode
 

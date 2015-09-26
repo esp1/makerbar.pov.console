@@ -79,9 +79,12 @@
      ~@body
      (.endDraw (current-graphics))))
 
+(defn ellipse
+  ([x y w h] (.ellipse (current-graphics) x y w h)))
+
 (defn fill
-  ([r g b] (fill r g b 1))
-  ([r g b a] (.fill (current-graphics) r g b (or a 1)))
+  ([r g b] (fill r g b 255))
+  ([r g b a] (.fill (current-graphics) r g b (or a 255)))
   ([gray a] (fill gray gray gray a)))
 
 (defn image
@@ -98,9 +101,9 @@
   ([sx sy] (.scale (current-graphics) sx sy)))
 
 (defn stroke
-  ([r g b] (stroke r g b 1))
+  ([r g b] (stroke r g b 255))
   ([r g b a] (.stroke (current-graphics) r g b a))
-  ([gray] (stroke gray 1))
+  ([gray] (stroke gray 255))
   ([gray a] (.stroke (current-graphics) gray)))
 
 (defn text
