@@ -13,6 +13,8 @@
 (defn mode []
   (reify UiMode
 
+    (init [_])
+
     (draw [_]
       (when (s/get-state :console-mirror)
         (p/scale -1 1)
