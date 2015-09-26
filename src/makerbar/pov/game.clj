@@ -37,19 +37,39 @@
       (for [i (range num-buttons)]
         (get button-ids (rand-int 8))))))
 
-(defn draw-pattern
-  "Draws the pattern of buttons on the current graphics context."
-  [pattern]
+(def arrow-angles
+  {:north-west (* p/TAU -0.125)
+   :north 0
+   :north-east (* p/TAU 0.125)
+
+   :west (* p/TAU -0.25)
+   :east (* p/TAU 0.25)
+
+   :south-west (* p/TAU -0.375)
+   :south (* p/TAU 0.5)
+   :south-east (* p/TAU 0.375)})
+
+(defn draw-arrow [button-id]
+  (p/with-matrix
+    (p/rotate (get arrow-angles button-id))
+    (p/shape [-5 10] [-5 0] [-10 0] [0 -10] [10 0] [5 0] [5 10])))
+
+(defn draw-buttons
+  [buttons]
   (let [r 10
-        delta 15]
+        d (* r 2)
+        delta (inc d)]
     (p/with-style
       (p/fill 255 255 0)
-      (doseq [[dx dy] (map #(get button-coords %) pattern)]
-        (p/ellipse (* dx delta) (* dy delta) r r)))
+      (doseq [b buttons
+              :let [[dx dy] (get button-coords b)]]
+        (p/with-matrix
+          (p/translate (* dx delta) (* dy delta))
+          (draw-arrow b))))
     (p/with-style
       (p/stroke 255)
       (p/no-fill)
-      (let [s (+ delta)]
+      (let [s (+ delta r)]
         (p/rect (- s) (- s) (* 2 s) (* 2 s))))))
 
 ;; Stages
@@ -76,7 +96,7 @@
         (p/text (pr-str (:target-pattern @game-state)) 0 20))
       (p/with-matrix
         (p/translate [(/ 224 2) (/ 102 2)])
-        (draw-pattern (:target-pattern @game-state))))
+        (draw-buttons (:target-pattern @game-state))))
 
     (ddr-button-pressed [_ evt]
       (when (jaeger evt :north) (s/inc-pov-offset [0 -1]))
@@ -90,24 +110,24 @@
       (condp = (.getKeyCode event)
 
         ;; DDR A
-        ;KeyEvent/VK_Q #_north-west
-        ;KeyEvent/VK_W #_north
-        ;KeyEvent/VK_E #_north-east
-        ;KeyEvent/VK_A #_west
-        ;KeyEvent/VK_D #_east
-        ;KeyEvent/VK_Z #_south-west
-        ;KeyEvent/VK_X #_south
-        ;KeyEvent/VK_C #_south-east
-        ;
-        ;; DDR B
-        ;KeyEvent/VK_I #_north-west
-        ;KeyEvent/VK_O #_north
-        ;KeyEvent/VK_P #_north-east
-        ;KeyEvent/VK_K #_west
-        ;KeyEvent/VK_SEMICOLON #_east
-        ;KeyEvent/VK_COMMA #_south-west
-        ;KeyEvent/VK_PERIOD #_south
-        ;KeyEvent/VK_SLASH #_south-east
+        KeyEvent/VK_Q #_north-west
+        KeyEvent/VK_W #_north
+        KeyEvent/VK_E #_north-east
+        KeyEvent/VK_A #_west
+        KeyEvent/VK_D #_east
+        KeyEvent/VK_Z #_south-west
+        KeyEvent/VK_X #_south
+        KeyEvent/VK_C #_south-east
+
+        ; DDR B
+        KeyEvent/VK_I #_north-west
+        KeyEvent/VK_O #_north
+        KeyEvent/VK_P #_north-east
+        KeyEvent/VK_K #_west
+        KeyEvent/VK_SEMICOLON #_east
+        KeyEvent/VK_COMMA #_south-west
+        KeyEvent/VK_PERIOD #_south
+        KeyEvent/VK_SLASH #_south-east
         KeyEvent/VK_SPACE (swap! game-state assoc-in [:target-pattern] (rand-pattern 2))
 
         nil))))

@@ -1,6 +1,10 @@
 (ns makerbar.pov.ui.processing
   (:import [processing.core PApplet PGraphics]))
 
+; Constants
+
+(def PI PGraphics/PI)
+(def TAU (* 2 PGraphics/PI))
 
 ; Applet binding
 
@@ -96,9 +100,20 @@
 (defn rect
   ([x y width height] (.rect (current-graphics) x y width height)))
 
+(defn rotate
+  ([a] (.rotate (current-graphics) a)))
+
 (defn scale
   ([s] (.scale (current-graphics) s))
   ([sx sy] (.scale (current-graphics) sx sy)))
+
+(defmacro shape
+  [& vertices]
+  `(do
+     (.beginShape (current-graphics))
+     ~@(for [[x y] vertices]
+         `(.vertex (current-graphics) ~x ~y))
+     (.endShape (current-graphics) PGraphics/CLOSE)))
 
 (defn stroke
   ([r g b] (stroke r g b 255))
