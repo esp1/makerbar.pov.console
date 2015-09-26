@@ -33,9 +33,9 @@
   "Returns a seq of random button ids. The length of the seq will at least 1 and at most num-buttons, but may be some number in between."
   [num-buttons]
   (let [button-ids (vec (keys button-coords))]
-    (distinct
-      (for [i (range num-buttons)]
-        (get button-ids (rand-int 8))))))
+    (apply hash-set
+           (for [i (range num-buttons)]
+             (get button-ids (rand-int 8))))))
 
 (def arrow-angles
   {:north-west (* p/TAU -0.125)
@@ -54,16 +54,22 @@
     (p/rotate (get arrow-angles button-id))
     (p/shape [-5 10] [-5 0] [-10 0] [0 -10] [10 0] [5 0] [5 10])))
 
+(defn draw-x []
+  (p/with-matrix
+    (p/rotate (/ p/TAU 8))
+    (p/shape [-10 -4] [-4 -4] [-4 -10] [4 -10] [4 -4] [10 -4]
+             [10 4] [4 4] [4 10] [-4 10] [-4 4] [-10 4])))
+
 (def button-size 20)
 (def button-spacing button-size)
 
-(defn draw-buttons
-  [buttons]
+(defn draw-button-glyphs
+  [buttons glyph-fn]
   (doseq [b buttons
           :let [[dx dy] (get button-coords b)]]
     (p/with-matrix
       (p/translate (* dx button-spacing) (* dy button-spacing))
-      (draw-arrow b))))
+      (glyph-fn b))))
 
 (defn draw-button-border []
   (let [s (+ button-spacing (/ button-size 2) 2)]
@@ -77,39 +83,48 @@
   (reify UiMode
 
     (init [_]
-      (reset! game-state {:ddr-a          {:feets 2
-                                           :score 0}
-                          :ddr-b          {:feets 2
-                                           :score 0}
-                          :target-pattern (rand-pattern 2)}))
+      (reset! game-state {:ddr-a   {:feets 2
+                                    :score 5}
+                          :ddr-b   {:feets 2
+                                    :score 5}
+                          :pattern (rand-pattern 2)}))
 
     (draw [_]
       ; clear
       (p/background 0)
 
-      (p/with-style
-        (p/stroke 255 0 0)
-        (p/text (pr-str (:target-pattern @game-state)) 0 20))
-
       (p/with-matrix
         (p/translate [(/ 224 2) (/ 102 2)])
 
-        ; draw ddr A buttons
-        (p/with-style
-          (p/fill 0 0 255 128)
-          (draw-buttons (map first (filter second (get-in @game-state [:ddr-a :buttons])))))
+        (let [pattern (get-in @game-state [:pattern])
+              a-buttons (->> (get-in @game-state [:ddr-a :buttons])
+                             (filter second)
+                             (map first))
+              b-buttons (->> (get-in @game-state [:ddr-b :buttons])
+                             (filter second)
+                             (map first))]
+          ; draw ddr A buttons
+          (p/with-style
+            (p/fill 0 0 255 128)
+            (draw-button-glyphs a-buttons (fn [b]
+                                            (if (some #{b} pattern)
+                                              (draw-arrow b)
+                                              (draw-x)))))
 
-        ; draw ddr B buttons
-        (p/with-style
-          (p/fill 255 0 0 128)
-          (draw-buttons (map first (filter second (get-in @game-state [:ddr-b :buttons])))))
+          ; draw ddr B buttons
+          (p/with-style
+            (p/fill 255 0 0 128)
+            (draw-button-glyphs b-buttons (fn [b]
+                                            (if (some #{b} pattern)
+                                              (draw-arrow b)
+                                              (draw-x)))))
 
-        ; draw target pattern
-        (p/with-style
-          (p/stroke 255)
-          (p/no-fill)
-          (draw-buttons (get-in @game-state [:target-pattern]))
-          (draw-button-border))))
+          ; draw target pattern
+          (p/with-style
+            (p/stroke 255)
+            (p/no-fill)
+            (draw-button-glyphs pattern draw-arrow)
+            (draw-button-border)))))
 
     (ddr-button-pressed [_ evt]
       (when (jaeger evt :north) (s/inc-pov-offset [0 -1]))
