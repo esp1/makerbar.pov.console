@@ -80,6 +80,12 @@
 (def score-range 10)
 (def game-state (atom nil))
 
+(defn get-buttons [team-map]
+  (->> (:buttons team-map)
+       (filter second)
+       (map first)
+       (apply hash-set)))
+
 (def initial-stage
   (reify UiMode
 
@@ -87,7 +93,15 @@
       (reset! game-state {:score   (/ score-range 2)
                           :team-a   {}
                           :team-b   {}
-                          :pattern (rand-pattern 2)}))
+                          :pattern (rand-pattern 2)})
+      (add-watch game-state :game-over
+                 (fn [k r old-state new-state]
+                   (let [a-buttons (get-buttons (:team-a @game-state))
+                         b-buttons (get-buttons (:team-b @game-state))
+                         pattern (:pattern @game-state)]
+                     (cond
+                       (= a-buttons pattern) (println "A wins!")
+                       (= b-buttons pattern) (println "B wins!"))))))
 
     (draw [_]
       ; clear
@@ -119,12 +133,8 @@
           (draw-button-border))
 
         (let [pattern (get-in @game-state [:pattern])
-              a-buttons (->> (get-in @game-state [:team-a :buttons])
-                             (filter second)
-                             (map first))
-              b-buttons (->> (get-in @game-state [:team-b :buttons])
-                             (filter second)
-                             (map first))]
+              a-buttons (get-buttons (:team-a @game-state))
+              b-buttons (get-buttons (:team-b @game-state))]
           ; draw team A buttons
           (p/with-style
             (p/fill 0 0 255)
@@ -189,8 +199,7 @@
 
         KeyEvent/VK_SPACE (swap! game-state assoc-in [:target-pattern] (rand-pattern 2))
 
-        nil)
-      (prn @game-state))
+        nil))
 
     (key-released [_ event]
       (condp = (.getKeyCode event)
