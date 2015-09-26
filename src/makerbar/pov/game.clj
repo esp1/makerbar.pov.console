@@ -1,4 +1,5 @@
 (ns makerbar.pov.game
+  (:import [java.awt.event KeyEvent])
   (:require [makerbar.pov.game.stage :as stage]
             [makerbar.pov.mode :as mode :refer (UiMode)]
             [makerbar.pov.state :as s]
@@ -23,13 +24,17 @@
 
 ;; Stages
 
+(def game-state (atom {:count 0}))
+
 (def initial-stage
   (reify UiMode
+
+    (init [_])
 
     (draw [_]
       (p/with-style
         (p/fill 0 255 255)
-        (p/text "Revolution" 0 20)))
+        (p/text (str "Revolution " (:count @game-state)) 0 20)))
 
     (ddr-button-pressed [_ evt]
       (when (jaeger evt :north) (s/inc-pov-offset [0 -1]))
@@ -40,7 +45,13 @@
       (when (jaeger evt :north-eats) (s/inc-img-scale -1)))
 
     (key-pressed [_ event]
-      (prn event))))
+      (condp = (.getKeyCode event)
+
+        KeyEvent/VK_UP (do (println "up") (swap! game-state update-in [:count] inc))
+        KeyEvent/VK_DOWN (do (println "down") (swap! game-state update-in [:count] dec))
+
+        nil)
+      (prn @game-state event))))
 
 ;; Mode
 
