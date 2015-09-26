@@ -7,4 +7,5 @@
 
 (defprotocol UiMode
   (draw [_])
-  (key-pressed [_ event]))
+  (key-pressed [_ event])
+  (ddr-button-pressed [_ event]))

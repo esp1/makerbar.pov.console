@@ -18,18 +18,6 @@
             (concat (map #(get ddr-a %) buttons)
                     (map #(get ddr-b %) buttons)))))
 
-(defn init-game [ddr-ch]
-  (when ddr-ch
-    (go-loop []
-      (when-let [evt (async/<! ddr-ch)]
-        (when (jaeger evt :north) (s/inc-pov-offset [0 -1]))
-        (when (jaeger evt :south) (s/inc-pov-offset [0 1]))
-        (when (jaeger evt :east) (s/inc-pov-offset [1 0]))
-        (when (jaeger evt :west) (s/inc-pov-offset [-1 0]))
-        (when (jaeger evt :north-west) (s/inc-img-scale 1))
-        (when (jaeger evt :north-eats) (s/inc-img-scale -1))
-        (recur)))))
-
 (defn rand-pattern [num-players]
   (distinct
     (for [i (range (* num-players 2))]
@@ -49,6 +37,14 @@
       (p/background 0)
 
       (d/pov-view #(render @game-state)))
+
+    (ddr-button-pressed [_ evt]
+      (when (jaeger evt :north) (s/inc-pov-offset [0 -1]))
+      (when (jaeger evt :south) (s/inc-pov-offset [0 1]))
+      (when (jaeger evt :east) (s/inc-pov-offset [1 0]))
+      (when (jaeger evt :west) (s/inc-pov-offset [-1 0]))
+      (when (jaeger evt :north-west) (s/inc-img-scale 1))
+      (when (jaeger evt :north-eats) (s/inc-img-scale -1)))
 
     (key-pressed [_ event]
       (prn event))))

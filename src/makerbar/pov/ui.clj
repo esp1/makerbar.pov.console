@@ -4,7 +4,8 @@
     :methods [[captureEvent [processing.video.Capture] void]
               [movieEvent [processing.video.Movie] void]])
   (:import [processing.core PApplet])
-  (:require [clojure.tools.cli :as cli]
+  (:require [clojure.core.async :as async :refer (<! go-loop)]
+            [clojure.tools.cli :as cli]
             [makerbar.pov.console :as console]
             [makerbar.pov.controller.ddr :as ddr]
             [makerbar.pov.game :as game]
@@ -17,7 +18,7 @@
 (defn setup []
   (p/size (p/display-width) (p/display-height))
   ; (q/frame-rate 30)
-  (m/set-mode! game/mode)
+  (m/set-mode! console/mode)
   (d/init))
 
 (defn -setup [this] (p/with-applet this (setup)))
@@ -40,8 +41,12 @@
                           :parse-fn #(Integer/parseInt %)]
                          ["-m" "--mirror" "Mirror console display"]])]
     (rendersphere/connect {:host host :port port})
-    (if mirror (s/set-state! :console-mirror mirror))
+    (if mirror (s/set-state! :console-mirror mirror)))
 
-    (game/init-game (ddr/connect)))
+  (when-let [ddr-ch (ddr/connect)]
+    (go-loop []
+      (when-let [evt (<! ddr-ch)]
+        (m/ddr-button-pressed @m/mode evt)
+        (recur))))
 
   (PApplet/main "makerbar.pov.ui"))
