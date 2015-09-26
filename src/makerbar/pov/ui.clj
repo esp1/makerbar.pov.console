@@ -7,24 +7,24 @@
   (:require [clojure.tools.cli :as cli]
             [makerbar.pov.console :as console]
             [makerbar.pov.controller.ddr :as ddr]
-            [makerbar.pov.controller.keyboard :as k]
             [makerbar.pov.game :as game]
+            [makerbar.pov.mode :as m]
             [makerbar.pov.rendersphere :as rendersphere]
             [makerbar.pov.state :as s]
             [makerbar.pov.ui.draw :as d]
             [makerbar.pov.ui.processing :as p]))
 
-
 (defn setup []
   (p/size (p/display-width) (p/display-height))
   ; (q/frame-rate 30)
+  (m/set-mode! game/mode)
   (d/init))
 
 (defn -setup [this] (p/with-applet this (setup)))
 ;(defn -sketchFullScreen [this] true)
-(defn -draw [this] (p/with-applet this (console/draw)))
+(defn -draw [this] (p/with-applet this (m/draw @m/mode)))
 
-(defn -keyPressed [this event] (p/with-applet this (k/key-pressed event)))
+(defn -keyPressed [this event] (p/with-applet this (m/key-pressed @m/mode event)))
 
 (defn -captureEvent [this camera] (.read camera))
 (defn -movieEvent [this movie] (.read movie))

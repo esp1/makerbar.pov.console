@@ -1,9 +1,11 @@
 (ns makerbar.pov.game
   (:require [clojure.core.async :as async :refer (go-loop)]
+            [makerbar.pov.mode :refer (UiMode)]
             [makerbar.pov.state :as s]
-            [makerbar.pov.ui.processing :as p]))
+            [makerbar.pov.ui.processing :as p]
+            [makerbar.pov.ui.draw :as d]))
 
-(def game-state (atom {}))
+(def game-state (atom {:stage :initial}))
 
 (defn jaeger
   "Returns true only if all target buttons are pressed on all ddr controllers.
@@ -33,11 +35,20 @@
     (for [i (range (* num-players 2))]
       (rand-int 8))))
 
-(defmulti game :stage)
-(defmethod game :init [_])
+(defmulti render :stage)
+(defmethod render :initial [_]
+  (p/with-style
+    (p/fill 255 255 0)
+    (p/text "Step on buttons!" 100 20)))
 
-(defn draw []
-  ; clear
-  (p/background 0)
+(def mode
+  (reify UiMode
 
-  )
+    (draw [_]
+      ; clear
+      (p/background 0)
+
+      (d/pov-view #(render @game-state)))
+
+    (key-pressed [_ event]
+      (prn event))))
