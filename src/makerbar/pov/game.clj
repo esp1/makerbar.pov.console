@@ -32,8 +32,11 @@
     (init [_])
 
     (draw [_]
+      ; clear
+      (p/background 0)
+
       (p/with-style
-        (p/fill 0 255 255)
+        (p/stroke 0 255 255)
         (p/text (str "Revolution " (:count @game-state)) 0 20)))
 
     (ddr-button-pressed [_ evt]
@@ -47,8 +50,8 @@
     (key-pressed [_ event]
       (condp = (.getKeyCode event)
 
-        KeyEvent/VK_UP (do (println "up") (swap! game-state update-in [:count] inc))
-        KeyEvent/VK_DOWN (do (println "down") (swap! game-state update-in [:count] dec))
+        KeyEvent/VK_UP (swap! game-state update-in [:count] inc)
+        KeyEvent/VK_DOWN (swap! game-state update-in [:count] dec)
 
         nil)
       (prn @game-state event))))
