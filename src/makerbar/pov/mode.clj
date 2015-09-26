@@ -9,4 +9,5 @@
   (init [_])
   (draw [_])
   (key-pressed [_ event])
+  (key-released [_ event])
   (ddr-button-pressed [_ event]))

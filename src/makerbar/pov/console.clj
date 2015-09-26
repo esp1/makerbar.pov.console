@@ -81,4 +81,5 @@
         (p/fill 0 (s/get-state :console-fade))
         (p/rect 0 0 (p/width) (p/height))))
 
-    (key-pressed [_ event] (k/key-pressed event))))
+    (key-pressed [_ event] (k/key-pressed event))
+    (key-released [_ event])))

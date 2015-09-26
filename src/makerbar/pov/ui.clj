@@ -29,6 +29,7 @@
 (defn -draw [this] (p/with-applet this (m/draw @m/mode)))
 
 (defn -keyPressed [this event] (p/with-applet this (m/key-pressed @m/mode event)))
+(defn -keyReleased [this event] (p/with-applet this (m/key-released @m/mode event)))
 
 (defn -captureEvent [this camera] (.read camera))
 (defn -movieEvent [this movie] (.read movie))
