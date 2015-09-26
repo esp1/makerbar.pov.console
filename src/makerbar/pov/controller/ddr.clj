@@ -3,16 +3,18 @@
             [serial.core :as serial]
             [clojure.core.async :as async]))
 
-(def button-nw 0x0200)                                      ; x
-(def button-n 0x0008)                                       ; up
-(def button-ne 0x0400)                                      ; o
+(def button-masks
+  {:north-west 0x0200                                       ; x
+   :north      0x0008                                       ; up
+   :north-east 0x0400                                       ; o
 
-(def button-w 0x0001)                                       ; left
-(def button-e 0x0004)                                       ; right
+   :west       0x0001                                       ; left
+   :east       0x0004                                       ; right
 
-(def button-sw 0x0800)                                      ; triangle
-(def button-s 0x0002)                                       ; down
-(def button-se 0x0100)                                      ; square
+   :south-west 0x0800                                       ; triangle
+   :south      0x0002                                       ; down
+   :south-east 0x100                                        ; square
+   })
 
 
 (defn read-byte
@@ -31,14 +33,9 @@
          cardinal-buttons))))
 
 (defn deserialize-button-value [button-bytes]
-  {:north      (not= 0 (bit-and button-bytes button-n))
-   :south      (not= 0 (bit-and button-bytes button-s))
-   :east       (not= 0 (bit-and button-bytes button-e))
-   :west       (not= 0 (bit-and button-bytes button-w))
-   :north-west (not= 0 (bit-and button-bytes button-nw))
-   :north-east (not= 0 (bit-and button-bytes button-ne))
-   :south-west (not= 0 (bit-and button-bytes button-sw))
-   :south-east (not= 0 (bit-and button-bytes button-se))})
+  (apply merge
+         (for [[kw mask] button-masks]
+           {kw (not= 0 (bit-and button-bytes mask))})))
 
 (defn ddr-serial [ch #_core.async.channel]
   (fn [in-stream]
