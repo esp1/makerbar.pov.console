@@ -1,7 +1,6 @@
 (ns makerbar.pov.console
   (:import [java.awt.event KeyEvent])
-  (:require [makerbar.pov.console.keys :as k]
-            [makerbar.pov.controller.ddr :as ddr]
+  (:require [makerbar.pov.controller.ddr :as ddr]
             [makerbar.pov.mode :refer (UiMode)]
             [makerbar.pov.state :as s]
             [makerbar.pov.ui.draw :as d]
@@ -159,5 +158,5 @@
       (when (ddr/jaeger evt :north-west) (s/inc-img-scale 1))
       (when (ddr/jaeger evt :north-east) (s/inc-img-scale -1))
 
-      (when (ddr/jaeger evt :south-west) (img/inc-image-selection -1))
-      (when (ddr/jaeger evt :south-east) (img/inc-image-selection 1)))))
+      #_(when (ddr/jaeger evt :south-west) (img/inc-image-selection -1))
+      #_(when (ddr/jaeger evt :south-east) (img/inc-image-selection 1)))))

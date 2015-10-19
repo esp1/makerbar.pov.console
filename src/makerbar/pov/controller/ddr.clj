@@ -46,24 +46,24 @@
                           :ddr-b (deserialize-button-value b-button-bytes)})
           (read-byte in-stream 0xFF))))))
 
+(defn list-serial-ports []
+  (map #(.getName %) (serial/port-identifiers)))
+
 (defn connect
   "Connect to DDR controllers. Returns a core.async channel where controller events will be sent to."
-  []
-  (if-let [port-id (first (filter #(.startsWith % "tty.usbserial-")
-                                  (map #(.getName %)
-                                       (serial/port-identifiers))))]
-    (let [port (serial/open port-id)
-          ch (async/chan (async/sliding-buffer 10))]
-      (println "Connected to DDR serial port" port-id)
-      (serial/listen! port (ddr-serial ch))
+  [port-id]
+  (println "Connecting to DDR controller at" port-id)
+  (let [port (serial/open port-id)
+        ch (async/chan (async/sliding-buffer 10))]
+    (println "Connected to DDR serial port" port-id)
+    (serial/listen! port (ddr-serial ch))
 
-      (.addShutdownHook (Runtime/getRuntime)
-                        (Thread. #(do
-                                   (println "Closing DDR serial port" port-id)
-                                   (serial/close port)
-                                   (async/close! ch))))
-      ch)
-    (println "DDR controllers not detected")))
+    (.addShutdownHook (Runtime/getRuntime)
+                      (Thread. #(do
+                                 (println "Closing DDR serial port" port-id)
+                                 (serial/close port)
+                                 (async/close! ch))))
+    ch))
 
 (defn jaeger
   "Returns true only if all target buttons are pressed on all ddr controllers.

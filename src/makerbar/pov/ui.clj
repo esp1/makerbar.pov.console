@@ -41,20 +41,24 @@
 (defn -main
   [& args]
 
-  (let [{{:keys [host port mirror]} :options}
+  (let [{{:keys [host port mirror ddr-port]} :options}
         (cli/parse-opts args
                         [["-h" "--host HOST" "Host IP address"]
                          ["-p" "--port PORT" "Port number"
                           :default 10000
                           :parse-fn #(Integer/parseInt %)]
-                         ["-m" "--mirror" "Mirror console display"]])]
+                         ["-m" "--mirror" "Mirror console display"]
+                         ["-d" "--ddr-port PORT" "DDR controller port"]])]
     (rendersphere/connect {:host host :port port})
-    (if mirror (s/set-state! :console-mirror mirror)))
+    (when mirror (s/set-state! :console-mirror mirror))
 
-  (when-let [ddr-ch (ddr/connect)]
-    (go-loop []
-      (when-let [evt (<! ddr-ch)]
-        (m/ddr-button-pressed @m/mode evt)
-        (recur))))
+    (println "Available serial ports:" (ddr/list-serial-ports))
+
+    (when ddr-port
+      (when-let [ddr-ch (ddr/connect ddr-port)]
+        (go-loop []
+          (when-let [evt (<! ddr-ch)]
+            (m/ddr-button-pressed @m/mode evt)
+            (recur))))))
 
   (PApplet/main "makerbar.pov.ui"))
